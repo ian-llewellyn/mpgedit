@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IFPkgDescriptionDeleteWarning</key>
+	<string></string>
+	<key>IFPkgDescriptionDescription</key>
+	<string>Welcome to the XMPGEDIT installer for Mac OS X. This program will install the xmpgedit program.
+</string>
+	<key>IFPkgDescriptionTitle</key>
+	<string>Mac OS X XMPGEDIT</string>
+	<key>IFPkgDescriptionVersion</key>
+	<string>__MAJOR__.__MINOR__ __RELTYPE____CKPOINT__</string>
+</dict>
+</plist>

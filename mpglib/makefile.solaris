@@ -1,0 +1,15 @@
+CFLAGS      = -KPIC -D__DECALPHA__ -Dlint -DNOANALYSIS $(CDEBUGFLAGS) $(CFLAGS1)
+
+CFLAGS1     = -I../include -I../libmp3lame 
+
+#CDEBUGFLAGS = -g
+
+all: libmpglib_mpgedit.so
+
+lib_objs = common.o dct64_i386.o decode_i386.o layer3.o tabinit.o interface.o
+
+libmpglib_mpgedit.so: $(lib_objs)
+	$(CC) -KPIC -G -o libmpglib_mpgedit.so $(lib_objs) -lm
+
+clean:
+	rm -f $(lib_objs) libmpglib_mpgedit.so

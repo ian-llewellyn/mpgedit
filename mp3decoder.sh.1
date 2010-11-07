@@ -1,0 +1,25 @@
+.\" $Id: mp3decoder.sh.1,v 1.3 2003/09/11 06:14:11 number6 Exp $
+."
+.TH mp3decoder.sh 1 \" -*- nroff -*-
+.SH NAME
+mp3decoder.sh \- MPEG 1/2/2.5 audio player script
+
+.SH SYNOPSIS
+.TP 9
+mp3decoder.sh
+.SH DESCRIPTION
+\fBmp3decoder.sh\fR is a shell script invoked from mpgedit to play an MPEG audio
+file.  This script is written to execute a command line MP3 player capable of
+playing data from standard input.
+The default configuration for
+\fBmp3decoder.sh\fR calls the MP3 player mpg123.  This script can be
+changed by the user to execute any MP3 player that can play input data
+from stdin.
+.PP
+.SH ACKNOWLEDGEMENTS
+By default, mp3decoder.sh depends on the MPEG audio player mpg123, written
+by Michael Hipp (\fBwww.mpg123.de\fR), and released under the GPL.
+
+.SH SEE ALSO 
+\fBmpgedit\fR(1), \fBxmpgedit\fR(1), \fBdecoder.so\fR(1), 
+\fBdecoder_popen.so\fR(1), \fBdecoder_mpg123.so\fR(1)

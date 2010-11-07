@@ -1,0 +1,76 @@
+py_mpgedit SDK 0.3 betahas been released
+=========================================
+
+CHANGES
+
+    * Added volume control
+    * Fixed exception handling when not using callbacks
+
+
+DESCRIPTION
+
+    py_mpgedit is the mpgedit SDK python extension for Linux
+    and Windows.
+
+    mpgedit Software Development Toolkit (SDK) is a library 
+    exporting core editing, playback and indexing functionality. 
+    It edits and plays MP3 files (MPEG 1 layer 1/ 2/3, MPEG 2, 
+    and MPEG 2.5 audio files). Using this toolkit, developers 
+    can create their own MP3 editing applications.
+
+
+SAMPLE SESSION
+
+    Here is a sample session demonstrating editing and playback 
+    of an mp3 file using this extension.  This creates a file 
+    new.mp3 from seconds 6 to 12 of old.mp3, then plays new.mp3.
+
+    >>> import pympgedit as mpgedit
+    >>> spec = mpgedit.EditSpec()
+    >>> spec.append('test1.mp3', '6-12')
+    >>> mpgedit.Index('test1.mp3').index()
+    >>> mpgedit.Edit(spec, 'test1_edits.mp3').edit()
+    >>> mpgedit.Play('test1_edits.mp3').play()
+
+import pympgedit as mpgedit
+spec = mpgedit.EditSpec()
+spec.append('test1.mp3', '6-12')
+mpgedit.Index('test1.mp3').index()
+mpgedit.Edit(spec, 'test1_edits.mp3').edit()
+mpgedit.Play('test1_edits.mp3').play()
+    
+import pympgedit as mpgedit
+import time
+p = mpgedit.Play('test1.mp3')
+p.play()
+go = 1
+while go:
+    try:
+        print "sleeping"
+        time.sleep(1)
+    except KeyboardInterrupt:
+        print "stopping playback..."
+        p.interrupted()
+        go = 0
+
+
+
+LICENSE
+
+    Python-based open source license
+    GPL-compatible
+
+
+LINKS
+
+    Download the py_mpgedit SDK:
+    http://www.mpgedit.org/mpgedit/download_sdks.html
+
+    Browse the documention:
+    http://www.mpgedit.org/mpgedit/sdk/py_mpgedit.htm
+    
+    mpgedit home page:
+    http://www.mpgedit.org
+
+    mpgedit SDK on freshmeat:
+    http://freshmeat.net/projects/mpgedit_sdk

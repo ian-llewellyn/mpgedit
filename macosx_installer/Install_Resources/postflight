@@ -1,0 +1,76 @@
+#!/bin/sh
+date                      > /tmp/mpgedit_postflight.txt
+echo "postflight 1 '$1'" >> /tmp/mpgedit_postflight.txt
+echo "postflight 2 '$2'" >> /tmp/mpgedit_postflight.txt
+echo "postflight 3 '$3'" >> /tmp/mpgedit_postflight.txt
+echo "postflight 4 '$4'" >> /tmp/mpgedit_postflight.txt
+
+# See if there is a previous mpgedit install to clean up first.
+# The strategy is to follow the /usr/bin/mpgedit symbolic link to 
+# the directory where it is linked to, and delete that installed directory.
+#
+instroot=$4
+instdir=$2
+if [ -s $instroot/usr/bin/mpgedit ]; then
+  if [ -n "`ls -l $instroot/usr/bin/mpgedit | grep '[ ]-> '`" ]; then
+    oldmpgeditpath=`ls -l $instroot/usr/bin/mpgedit | sed 's|.* -> ||'`
+    if [ -f "$oldmpgeditpath" ]; then
+      oldmpgeditdir=`echo "$oldmpgeditpath" | sed 's|/Contents/MacOS/bin/mpgedit$||'`
+      if [ -d "$oldmpgeditdir" ]; then
+        if [ "$instdir/mpgedit.app" != "$oldmpgeditdir" ]; then
+
+          # Paranoid much?  Can't be too careful when rm -rf as root.
+          #
+          tmptst=`echo "$oldmpgeditdir" | grep '/mpgedit.app$'`
+          if [ -n "$tmptst" ]; then
+            (cd /tmp && rm -rf "$oldmpgeditdir")
+          fi
+        fi
+      fi
+    fi
+  fi
+fi
+
+
+# Delete old symbolic links, then create links to new installation.
+#
+# /Applications/mpgedit.app/Contents/MacOS/bin/mpgedit
+# /usr/lib/libmpgedit_decoder.dylib -> /Applications/mpgedit.app/Contents/MacOS/lib/libdecoder_mpg123.dylib
+# OPTIONAL_MANPATH        /Applications/mpgedit.app/Contents/MacOS/man
+
+rm -f $instroot/usr/lib/libmpgedit_decoder.dylib
+rm -f $instroot/usr/bin/mpgedit
+ln -s $instdir/mpgedit.app/Contents/MacOS/lib/libdecoder_mpg123.dylib $instroot/usr/lib/libmpgedit_decoder.dylib
+ln -s $instdir/mpgedit.app/Contents/MacOS/bin/mpgedit                 $instroot/usr/bin/mpgedit
+
+# Fix up /etc/manpath.conf file.
+#
+mv /etc/manpath.config /etc/manpath.config_mpgedit
+
+# Remove previous MPGEDIT manpath configuration
+#
+sed '/OPTIONAL_MANPATH.*\/mpgedit.app\/.*/d' /etc/manpath.config_mpgedit > \
+    /etc/manpath.config
+
+# Add new mpgedit manpath
+#
+echo "OPTIONAL_MANPATH	$instdir/mpgedit.app/Contents/MacOS/man" >> /etc/manpath.config
+
+# Fix up the Mpgedit.term resource file
+#
+if [ -f $instdir/mpgedit.app/Contents/Resources/Mpgedit.term ]; then
+  mv $instdir/mpgedit.app/Contents/Resources/Mpgedit.term \
+     $instdir/mpgedit.app/Contents/Resources/Mpgedit.term.orig
+  sed "s|__INSTALLDIR__|$instdir|" \
+    $instdir/mpgedit.app/Contents/Resources/Mpgedit.term.orig > \
+    $instdir/mpgedit.app/Contents/Resources/Mpgedit.term
+fi
+
+# Install the uninstall_check cron file.  This gets cleaned up by itself
+# once mpgedit is uninstalled as a running cron job.
+#
+if [ -d /etc/periodic/daily ]; then
+  cp $instdir/mpgedit.app/Contents/Resources/200.mpgedit_uninstall_check \
+     /etc/periodic/daily
+  chmod +x /etc/periodic/daily/200.mpgedit_uninstall_check
+fi

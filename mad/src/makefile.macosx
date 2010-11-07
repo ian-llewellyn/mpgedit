@@ -1,0 +1,62 @@
+#
+# MAD (MPEG Audio Decoder) Linux makefile
+# for mpgedit project, 
+# Copyright (C) 2001-2006 by Adam Bernstein
+#
+# libmad - MPEG audio decoder library
+# Copyright (C) 2000-2004 Underbit Technologies, Inc.
+#
+CFLAGS = -DHAVE_CONFIG_H -I. -I../src -DFPM_PPC -Wall -O -fforce-mem \
+         -fforce-addr -fthread-jumps -fcse-follow-jumps -fcse-skip-blocks \
+         -fexpensive-optimizations -fregmove -fschedule-insns2 \
+         -fno-common -DPIC -c
+
+MAD_OBJS = bit.o      fixed.o  huffman.o  \
+           layer3.o   stream.o timer.o    \
+           decoder.o  frame.o  layer12.o  \
+           synth.o    version.o
+
+all: libmad.a
+
+libmad.a: $(MAD_OBJS)
+	$(AR) rv libmad.a $(MAD_OBJS)
+	ranlib libmad.a
+
+bit.o: ../src/bit.c
+	$(CC) $(CFLAGS) ../src/bit.c -o bit.o 
+
+fixed.o: ../src/fixed.c
+	$(CC) $(CFLAGS) ../src/fixed.c -o fixed.o 
+
+huffman.o: ../src/huffman.c
+	$(CC) $(CFLAGS) ../src/huffman.c -o huffman.o 
+
+layer3.o: ../src/layer3.c
+	$(CC) $(CFLAGS) ../src/layer3.c -o layer3.o 
+
+stream.o: ../src/stream.c
+	$(CC) $(CFLAGS) ../src/stream.c -o stream.o 
+
+timer.o: ../src/timer.c
+	$(CC) $(CFLAGS) ../src/timer.c -o timer.o 
+
+decoder.o: ../src/decoder.c
+	$(CC) $(CFLAGS) ../src/decoder.c -o decoder.o 
+
+frame.o: ../src/frame.c
+	$(CC) $(CFLAGS) ../src/frame.c -o frame.o 
+
+layer12.o: ../src/layer12.c
+	$(CC) $(CFLAGS) ../src/layer12.c -o layer12.o 
+
+minimad.o: ../src/minimad.c
+	$(CC) $(CFLAGS) ../src/minimad.c -o minimad.o 
+
+synth.o: ../src/synth.c
+	$(CC) $(CFLAGS) ../src/synth.c -o synth.o 
+
+version.o: ../src/version.c
+	$(CC) $(CFLAGS) ../src/version.c -o version.o 
+
+clean:
+	rm -f libmad.a $(MAD_OBJS)

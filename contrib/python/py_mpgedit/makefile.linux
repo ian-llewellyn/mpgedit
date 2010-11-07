@@ -1,0 +1,9 @@
+#
+# Linux mpgedit Python extension build
+#
+
+install:
+	python ./setup_pympgedit.py build
+
+clean:
+	python ./setup_pympgedit.py clean

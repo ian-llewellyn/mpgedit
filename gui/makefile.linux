@@ -1,0 +1,99 @@
+CFLAGS      = -fPIC -Dlint -DSTDC_HEADERS -Wall $(CDEBUGFLAGS) $(CFLAGS1)
+CFLAGS1     = -I.. `pkg-config --cflags gtk+-2.0`
+CDEBUGFLAGS = -O3
+
+LDLIBS      = `pkg-config --libs gtk+-2.0`
+
+# Enable these for debugging and Electric Fence memory debugging
+# CDEBUGFLAGS = -g -D_DEBUG
+#EFENCE = -lefence
+
+
+all: xmpgedit
+tests: swindow2 swindow spinner spinner2 editor volume icon pcmview \
+       playctrl ledtime
+unit_test: editor pcmview playctrl volume
+
+XMPGEDIT_OBJS = player.o playctrl.o editor.o volume.o pcmview.o ../wav16.o \
+                ledtime.o
+
+xmpgedit: $(XMPGEDIT_OBJS) ../libmpgeditlib.a
+	$(CC) $(LDFLAGS) $(XMPGEDIT_OBJS) -o xmpgedit -L.. -lmpgeditlib \
+               `pkg-config --libs gtk+-2.0` $(EFENCE)
+
+
+spixmap: spixmap.o
+	$(CC) $(LDFLAGS) spixmap.o -o spixmap $(LDLIBS)
+
+swindow2: swindow2.o
+	$(CC) $(LDFLAGS) swindow2.o -o swindow2 $(LDLIBS)
+
+swindow: swindow.o
+	$(CC) $(LDFLAGS) swindow.o -o swindow $(LDLIBS)
+
+spinner: spinner.o
+	$(CC) $(LDFLAGS) spinner.o -o spinner $(LDLIBS)
+
+spinner2: spinner2.o
+	$(CC) $(LDFLAGS) spinner2.o -o spinner2 $(LDLIBS)
+
+editor_main.o: editor.c
+	$(CC) $(CFLAGS) -D_UNIT_TEST -c editor.c -o editor_main.o
+
+editor: editor_main.o playctrl.o
+	$(CC) $(LDFLAGS) editor_main.o playctrl.o -o editor -L../ -lmpgeditlib \
+            $(LDLIBS)
+
+VOLUME_OBJS = volume_main.o ../volumeif.o playctrl.o
+volume_main.o: volume.c
+	$(CC) $(CFLAGS) -D_UNIT_TEST -c volume.c -o volume_main.o
+
+volume: volume_main.o playctrl.o
+	$(CC) $(LDFLAGS) $(VOLUME_OBJS) -o volume $(LDLIBS) -L.. -lmpgeditlib
+
+icon: icon.o playctrl.o
+	$(CC) $(LDFLAGS) icon.o playctrl.o -o icon $(LDLIBS)
+
+pcmview_main.o: pcmview.c
+	$(CC) $(CFLAGS) -D_UNIT_TEST -c pcmview.c -o pcmview_main.o
+
+pcmview: pcmview_main.o
+	$(CC) $(LDFLAGS) -o pcmview pcmview_main.o -L../ -lmpgeditlib $(LDLIBS)
+
+playctrl_main.o: playctrl.c
+	$(CC) $(CFLAGS) -D_UNIT_TEST -c playctrl.c -o playctrl_main.o
+
+playctrl: playctrl_main.o
+	$(CC) $(LDFLAGS) -o playctrl playctrl_main.o \
+              -L../ -lmpgeditlib $(LDLIBS) $(EFENCE)
+
+ledtime_main.o: ledtime.c
+	$(CC) $(CFLAGS) -D_UNIT_TEST -c ledtime.c -o ledtime_main.o
+
+ledtime: ledtime_main.o playctrl.o
+	$(CC) $(LDFLAGS) -o ledtime ledtime_main.o playctrl.o\
+              -L../ -lmpgeditlib $(LDLIBS) $(EFENCE)
+
+clean:
+	$(RM) -f $(PLAY_OBJS) $(XMPGEDIT_OBJS) spinner.o xmpgedit \
+                 volume spinner editor volume_main.o swindow.o swindow2.o \
+                 pcmview_main.o editor_main.o  spinner2.o icon.o \
+                 ledtime_main.o playctrl_main.o  spixmap.o  \
+                 ledtime swindow swindow2 icon playctrl spinner2 spixmap \
+                 pcmview
+
+credits.h: ../README
+	./credits.pl > credits.h
+
+../playif.o: ../playif.h
+player.o: player.h editor.h  ../playif.h   ../editif.h  editor.h        \
+          volume.h pcmview.h ../segment.h  ../version.h ../pcmlevel.h   \
+          ../wav16.h         ../mpegindx.h ../portability.h playctrl.h  \
+          credits.h
+
+playctrl.o: playctrl.h
+
+editor.o: editor.h ../editif.h
+pcmview.o: pcmview.h ../pcmlevel.h
+pcmview_main.o: pcmview.h ../pcmlevel.h
+ledtime_main.o ledtime.o: ledtime.h

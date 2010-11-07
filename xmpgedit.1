@@ -1,0 +1,607 @@
+.\" $Id: xmpgedit.1,v 1.3.2.2 2009/01/23 17:20:46 number6 Exp $
+."
+.TH xmpgedit 1 \" -*- nroff -*-
+.SH NAME
+xmpgedit \- MPEG 1/2/2.5 audio (mp3) file editor
+
+.SH SYNOPSIS
+.TP 9
+xmpgedit [\fBinputfile1\fR [\fBinputfile2\fR...]]
+.PP
+xmpgedit [\fB-c\fR] [\fB-h\fR] [\fB-O\fR offsec.offmsec] 
+[\fB-e\fR [\fBstart\fR[\fB-\fR[\fBend\fR]]]] [\fB-f\fR \fBinputfile\fR]
+.PP
+
+.SH DESCRIPTION
+xmpgedit is the graphical user interface (GUI) implementation of mpgedit.
+xmpgedit supports most of the same editing features of mpgedit.
+xmpgedit uses the GTK+ 2.0 toolkit, on both Linux and Windows.  The
+windows installer distribution also installs GTK+ for Windows as part of the
+install process.
+
+xmpgedit is an MPEG 1 layer 1/2/3, MPEG 2, and MPEG 2.5 audio (mp3)
+file editor that is capable
+of processing both Constant Bit Rate (CBR) and Variable Bit Rate (VBR) encoded
+files.  xmpgedit can cut an input MPEG file into one or more output files, as
+well as join one or more input MPEG files into a single output file.  When
+editing VBR files that have a XING header, xmpgedit updates the output
+file's XING header information to reflect the new file size and
+average bit rate.
+
+When editing a file, xmpgedit locates the nearest MPEG frame boundary for the
+desired start and end times, then copies the frames between these times 
+to the output file.  Since no file decoding / encoding occurs during editing,
+there is no audio quality loss when editing with xmpgedit. 
+For each file being edited, a time index file is
+created that stores the file position, in bytes, for every 1 second of
+play time.  Indexing guarantees correct and fast random access to 
+edit time offsets for VBR-encoded files.  
+
+xmpgedit file playback allows
+edit-time audio playback auditioning, which insures that desired cut occurs 
+at the correct time offset. 
+This feature is necessary when making edits that demand sub-second
+accuracy (especially with VBR files).  Since most MP3 players display 
+playback run times based on a VBR file's average encoded bit rate, 
+edits based on these players' displayed times can miss the desired 
+start or stop time by many seconds.  
+
+xmpgedit resembles an MP3 audio player when started.  A toolbar is
+present at the top of the interface. Below the toolbar is the file edit list.
+Below the edit window is a playback status area. Below the status area are
+found two nearly identical audio playback controls. 
+
+These playback controls are used to specify edit start and stop times for
+the currently selected file.  The top playback control is used to
+specify the edit start time, the bottom specify the edit
+end time. 
+The play button
+works as expected; playback occurs when clicked in, and stopped when 
+clicked out.  The record button can be pressed at any time, either
+during playback, or after an edit time selection has been changed. By doing
+so, the time during playback when the record button is pressed, or the 
+specified edit time is recorded in the edit
+list.  The play previous button plays back from 5 seconds 
+\fBbefore\fR the currently selected edit time, stopping after 5 seconds of
+material has been played.
+The default playback control buttons are
+the play button, the record button, and the play previous button.  
+The pause button, stop button and volume control can be enabled through
+the File->Options menu.  
+
+Edit times are specified using either the scroll bar below the play
+buttons, or the time spinner buttons to the right of the play
+buttons.  An edit time can also be typed directly into the numeric
+fields immediately to the left of each spinner button set.  These
+three fields set the edit minute, second and millisecond values respectively.
+
+When using audio playback to test an edit time,
+that edit time can be adjusted using either the spinner buttons, or the
+scroll bar.  When the time is changed, playback immediately stops.
+Playback will now start from the newly specified edit time. Using this 
+combination of playback, and edit time modification, searching for 
+the desired edit point is quickly accomplished.  Once the desired
+edit point is found, pressing the \fBrecord\fR button stores the
+edit time in the edit list for the highlighted entry.  Both a start 
+and end edit time must be selected for each file loaded into the editor.
+
+The tool bar File and Edit menus are also available as popup menus.
+When the mouse cursor is over a blank area in the playback control area,
+clicking the right mouse button (a right click) will popup the File menu.
+A right click anywhere in the edit list area will popup the Edit menu.
+
+.SH COMMAND LINE OPTIONS
+xmpgedit has the following command line options:
+.TP 4
+\fB-c\fR 
+Curses edit mode. This option is accepted but ignored. This is present
+for compatibility with scripts written for mpgedit and xmpgedit.
+.TP 4
+\fB-e\fR 
+\fB-e start\fR[\fB-\fR[\fBend\fR]]
+Perform copy/paste operation on input files. The input MP3
+file may be encoded as either CBR or VBR.  For quick and accurate
+random access to VBR-encoded files, an external time index file
+is created.  The index file uses the basename of the input file
+with the '.idx' extension.
+.TP
+\fB-f\fR input file name
+Use the named input file.
+Multiple -f options are allowed.  At least one -e option must be
+precede each -f option.
+.TP
+\fB-h\fR
+Print xmpgedit usage.
+.TP
+\fB-O\fR offset_sec.offset_msec
+.TP
+\fB-O\fR offset_sec:offset_msec
+Sepecify offset time for zero second start for input MP3 file.
+This option specifies a new zero second start time for the input
+MP3 file. This option is useful when editing an MP3 file that has
+recorded lead-in material using a known playlist of start/stop
+times. In this situation, the lead-in material must be ignored
+for the first recorded selection's start time to match the playlist.
+The start time is specified in seconds and milliseconds, separated
+by \fB.\fR or a \fB:\fR.
+
+.SH FILE MENU CONTROLS
+Each of the controls present on the File menu are described in detail
+in this section.  Presenting the operating details of these controls
+will reveal some of the features of xmpgedit.
+.TP 4
+\fBOpen File...\fR
+Open an input file selection control. Navigate to 
+the directory containing audio files to edit, then
+select a file ending with the \fB.mp3\fR, \fB.mp2\fR or \fB.mp1\fR extension.
+Additionally, selecting files named with the \fB.idx\fR extension 
+are assumed to be \fB.mp3\fR files.  For example, selecting \fBtest1.idx\fR
+is the same as selecting \fBtest1.mp3\fR. The \fBarrow up\fR control
+on the far right of the playback status area also opens the file selection
+control.  The name of a file to edit can be entered on the edit line directly 
+left of the \fBarrow up\fR control.  Once a file to edit is selected,
+a new entry for that file is appended to the end of the edit list.
+.TP 4
+\fBOutput File...\fR
+Output file name control. Specify the output file name
+on the text edit line at the top of this control.  Pressing the
+\fBOpen\fR button opens a file selection control to browse to the
+directory that contains the desired output file. This feature is useful
+when joining edits (appending) with an existing file.  xmpgedit
+operates in two editing modes: \fBJoin\fR and \fBSplit\fR.  
+The \fBJoin\fR mode appends all specified edits into a single output file.
+The \fBSplit\fR mode saves each edit into a separate output file, uniquely
+named with a numeric suffix.  For example, when the output file name
+\fBtest1\fR is specified and \fBSplit\fR is selected, edits are saved
+into output files named test1_1.mp3, test1_2.mp3, test1_3.mp3, and so on.
+Note that this numbering always begins with \fB1\fR, which means if
+the file \fBtest1_1.mp3\fR already exits, the edit will fail.
+The default edit mode is \fBSplit\fR and the default output file name is
+the name of the first input file loaded into the editor, with an underscore
+appended to the name. For example, when \fBtest1.mp3\fR is the first file
+loaded into the editor, the default output file name is \fBtest1_\fR.
+.TP 4
+\fBSave Session...\fR
+Save Session file selection control.  All of the files and edit times
+that appear in the edit list window are saved to the file named in this
+control.  Specify the name of the file to
+save the edit session on the text edit line at the top of this
+control. Press the \fBOpen\fR button to open a file selection control
+to browse to the 
+directory and select the name of an existing file to save the
+edit session.
+The default save session file name is \fB.mp3edit_abandoned\fR. When the
+file \fB.mp3edit_abandoned_name\fR exists, the name stored in this file
+is used. This means the last file name entered in the \fBSave Session...\fR
+dialog will become the default save session file name.
+.TP 4
+\fBLoad Session...\fR
+Load Session file selection control.  Edits previously saved using
+\fBSave Session...\fR are loaded into the editor.  The edit session is 
+also saved during the file editing process, by selecting \fBFile->Edit\fR.
+Specify the name of the save session to load on the text edit line at
+the top of this control.  Press the \fBOpen\fR button to open a file selection
+control and browse to the directory containing the saved session file.
+Files named with a leading \fB.\fR do not appear in this file selection
+control by default.  Enter \fB.<TAB>\fR (a period followed by the TAB key)
+on the text edit line and all files beginning with a \fB.\fR will appear.
+This mechanism is a generic way of narrowing the files listed in the
+file selection control.  Specifying \fBtest1<TAB>\fR will cause the
+selection control to list only files beginning with \fBtest\fR.
+.TP 4
+\fBEdit\fR
+Edit files.  All edits specified in the edit list window are performed.
+Edits are saved to default output filename, 
+unless specified by \fBFile->Output file...\fR option.
+The default output filename  is
+the  same  basename  as  the  input  file,  with the '_nn.mp3' 
+extension appended. 
+Refer to the \fBOutput file...\fR section for more details.
+The current edit list is saved to the save session file before performing
+the specified edits.  The save session output file is specified with
+\fBFile->Save Session...\fR.  When the save session file already exists,
+a warning dialog is displayed, and a new name can be specified, or
+the existing file can be overwritten.
+.TP 4
+\fBSet Offset\fR
+Sepecify offset time for zero second start for input MP3 file.
+This feature specifies a new zero second start time for the input
+MP3 file. This option is useful when editing an MP3 file that has
+recorded lead-in material using a known playlist of start/stop
+times. In this situation, the lead-in material must be ignored
+for the first recorded selection's start time to match the playlist.
+The currently selected \fBPlayback time\fR is set as the new offset
+time after the \fBSet Offset\fR action is taken. When viewing
+the volume levels with the \fBDecode\fR feature (see below), you must
+click on the file name in the edit list for the specified offset time
+to take effect.
+.PP
+.RS 4
+Note: The \fBOptions->Offset time\fR check box must be selected before the
+\fBSet Offset\fR menu entry is visible.
+.RE
+.TP 4
+\fBDecode\fR
+Display decoded MP3 file volume levels.  This option decodes the selected
+file in the editor, then opens a graphical viewer/editor to display the
+file's volume levels.  Because this operation is computationally expensive,
+this option is not the default.  To help improve performance, only every 
+third frame in the input file is decoded. The decoded results are stored
+in the file named \fBprefix\fR.lvl, where \fBprefix\fR is the basename
+component of the input file selected.  Once loaded into the viewer, edit
+times can be selected by left-clicking the mouse on the desired time
+on the volume level display.  A single click selects the \fBPlayback time\fR, 
+which can then be saved as a start or stop edit time by clicking on the
+green \fBRecord start time\fR or red \fBRecord end time\fR buttons.
+Left clicking and holding then dragging the cursor to the right or left across
+the volume levels will highlight all of the segment that will be included
+in the edit. Releasing the mouse button then sets the start and end edit
+times. Dragging the cursor out of the volume viewer to the right or left
+while holding the mouse button will cause the display to scroll to show
+additional volume levels.
+.TP 4
+\fBStatistics\fR
+Display MP3 file statistics.  This option displays file size and frame
+statistics about the selected file in the editor.  Information displayed
+in this display includes the file's name, VBR maximum/minimum/average
+encoding bitrate, total frames, file size, playback length and a detailed
+breakdown of frame bitrates for VBR encoded files.
+.TP 4
+\fBOptions...\fR
+Configurable options. xmpgedit configurable options are set using
+this menu. These options are selected by this menu:
+.RS 8
+* The playback \fBpause\fR button
+.RE
+.RS 8
+* The playback \fBstop\fR button
+.RE
+.RS 8
+* The \fBvolume\fR control
+.RE
+.RS 8
+* The start \fBOffset time\fR LED display.
+.RE
+.RS 10
+Note: Enabling this option also
+adds the \fBSet Offset\fR control to the File menu list.
+.RE
+.RS 4
+The configuration is saved to the file \fB.xmpgeditrc\fR in the current
+working directory.
+.RE
+.TP 4
+\fBExit\fR
+Quit xmpgedit.  When changes to the current edit list have not been committed
+to a save session file,
+a warning dialog is displayed.  xmpgedit is
+not quit when \fBcancel\fR is clicked.  Afterwards, select 
+\fBFile->Save Session...\fR to commit the edit list to a save session file.
+
+.SH EDIT MENU CONTROLS
+.TP 4
+\fBCut\fR
+Copy the selected row in the edit list to the save buffer, and delete.
+The cut row can be pasted using the \fBEdit->Append\fR option.
+.TP 4
+\fBCopy\fR
+Copy the selected row in the edit list to the save buffer.  
+The copied row can be pasted using the \fBEdit->Append\fR option.
+.TP 4
+\fBAppend\fR
+Append the edit line from the save buffer into the row below the 
+currently selected row.  The saved row can be pasted as the very first
+row in the editor by selecting the blank row at the top of the edit list
+before using the \fBEdit->Append\fR option.
+.TP 4
+\fBCopy/Chain\fR
+Copy the selected row in the edit list and paste it below the current
+row. The start and end times of the new row are the same as the end time of
+the previous row. Since the start time of the new row starts with the end
+time of the previous row, this operation links or \fBchains\fR the two edit
+lines together.
+.TP 4
+\fBCopy/Append\fR
+Duplicate selected row. This option is similar to performing an 
+\fBEdit->Copy\fR followed by an \fBEdit->Append\fR, but the appended
+line is always the next line following the line copied with this action.
+Additionally, the save buffer is not used with \fBCopy/Append\fR.
+.TP 4
+\fBCopy Start Time\fR
+Initialize the end time of the selected row using the start time
+of the next row. In other words, this action chains the end time 
+of the current edit with the start time of the next edit.
+.TP 4
+\fBCopy End Time\fR
+Initialize the start time of the the selected row using the end time
+of the previous row.  This option is useful when editing a
+single file that contains a series of tracks that will be split into
+individual files.  Typically, the start time of each segment begins at
+the end time of the previous segment.  Even when the current start time 
+does not begin with exactly the same previous end time, using the 
+\fBCopy End Time\fR option initializes the start time to a value that 
+is close to the desired edit time.
+.TP 4
+\fBClear Editor\fR
+This action deletes all edits from the edit list and resets xmpgedit.
+Caution: Any unsaved edits are destroyed by this action.
+
+.SH HELP MENU CONTROLS
+.TP 4
+\fBAbout\fR
+Display xmpgedit copyright and credits dialog.
+
+.SH EXAMPLES
+This example demonstrate how to cut a single file into 4 pieces, then
+merge those 4 files into a single output file.
+.TP 4
+Edit a file into 4 pieces.
+Start xmpgedit.
+
+Enter the input file name \fBtest1.mp3\fR.  This can be accomplished by 
+typing the path into the \fBFile:\fR name edit line, or by
+using \fBFile->Open File...\fR, or clicking the \fBup arrow\fR.
+Repeat until there are 4 entries in the edit window for \fBtest1.mp3\fR.
+As a short cut, after the first file is loaded, just press \fB<ENTER>\fR
+in the file name edit line until 4 entries appear in the editor.
+
+Click on the first line in the edit window.
+
+Specify an end edit time of 6 seconds using the \fBEnd Time:\fR playback 
+spinner or scroll bar controls.  Click the \fBrecord\fR button.
+
+Click on the second line in the edit window.
+
+Right click in the edit window, and select \fBCopy End Time\fR.  The start
+time is now set to the end time of the first line.
+
+Again use the \fBEnd Time:\fR edit time controls to now specify an 
+end time of 12 seconds.  Now click on the third line in the edit window 
+without first pressing the record buttons.  A dialog asking to record the
+unsaved changes appears.  Click OK.
+
+Use \fBCopy End Time\fR to initialize the start edit time.  Set the end 
+edit time to 18 seconds.  Press the play previous button.  The previous
+5 seconds of material before the specified edit time is played.
+
+Click the fourth line in the editor.  Once again, use \fBCopy End Time\fR
+to specify the start edit time.  Move the end edit time slider to the far
+right.
+
+Right click in a blank area in the playback controls area, and select
+\fBEdit\fR. Click OK to commit any unsaved changes.  Edit progress
+bars display as the edits proceed.  Because these edits are so short,
+the progress bars are only displayed briefly.
+
+In the edit list area, right click and select \fBClear Editor\fR.  The
+editor is now initialized to an empty state.
+
+.TP 4
+Joining 4 files into a single file.
+Select from the main tool bar \fBFile->Load Session...\fR, and accept
+the default session \fB.mp3edit_abandoned\fR.  The edit session previously
+performed is now loaded into the editor.
+
+Select from the main tool bar \fBFile->Output File...\fR.  Remember that
+right clicking over a blank area in the playback controls area also brings 
+up the main menu.  In the \fBOutput file name\fR dialog, select the \fBJoin\fR
+radio button, and enter the output file name \fBtest_join\fR, then click OK.
+
+Right click over the playback area, and select \fBEdit\fR.  The four files
+listed in the editor have now been joined together into a single file, named
+\fBtest1_join.mp3\fR.  This file is identical to the original \fBtest1.mp3\fR
+input file.
+.PP
+Example selecting edit times by playback
+.RS 4
+This example demonstrates
+how to locate edit times by listening to the file being edited. This
+technique is useful when editing a file where the edit start and stop times
+are not known in advance, such as music recorded from satellite radio.
+
+Start xmpgedit
+
+Load test1.mp3 into the editor.
+
+Push the \fBEnd Time\fR play button.  While the file is playing,
+push the \fBrecord\fR button. Notice the end time in the edit list is
+updated each time the record button is pressed.  There is a brief
+period of silence between 6 and 7 seconds.  Practice finding that time
+using the \fBrecord\fR button.  Test the selected time by playing back
+the selected edit time using the \fBPlay Previous\fR and \fBPlay\fR buttons.
+Use the second and millisecond spinner buttons to refine the candidate
+end time.  The first edit end time should be 6.5 seconds.
+
+Over the edit list \fBRight click\fR and select \fBCopy/Append\fR.
+Then \fBRight click\fR and select \fBCopy End Time\fR. Using the technique
+described above, locate the edit end time.  The second edit end time
+is 12.5 seconds.
+
+Again, \fBRight click->Copy/Append\fR and \fBRight click->Copy End Time\fR
+to create the third edit entry.  Locate the third edit end time using
+the above technique.  The third edit end time is at 19 seconds.  Verify this
+is correct by using the \fBPlay\fR and \fBPlay Previous\fR controls.
+
+Once again, \fBRight click->Copy/Append\fR and \fBRight click->Copy End Time\fR
+to create the fourth and final edit entry.  This time slide the end time 
+scroll bar to the far right, and press the \fBRecord\fR button.
+
+Select \fBFile->Output file...\fR and specify \fBsecond_test\fR as the 
+output file name, and press <ENTER>.
+
+Select \fBFile->Edit\fR to perform the specified edits.
+.RE
+
+.SH GTK CONFIGURATION
+xmpgedit pixmap images are located in /usr/local/share/xmpgedit, or
+/basedir/share/xmpgedit when installed in a directory other than the 
+default.  This information must be configured in one of these two
+locations:
+.RS 4
+- $HOME/.xmpgedit-gtkrc
+
+- /usr/local/etc/gtk-2.0/gtkrc
+.RE
+
+Add the following entry to these files:
+.RS 4
+pixmap_path "/usr/local/share/xmpgedit"
+.RE
+
+The UNIX mpgedit install script attempts to update the global gtkrc
+file. However, this will not occur when the location of this file
+cannot be determined.  In this case, the appropriate pixmap_path entry
+must be added manually.
+
+Note: It is not necessary to add this entry to the $HOME/.xmpgedit-gtkrc
+file when added to the global gtkrc file.
+
+.SH PLAYBACK CONFIGURATION
+xmpgedit requires configuration for the sound playback feature to work.
+As root, run \fBmake install\fR.  For Linux as part of the installation,
+the shared library loader is configured to search the directory 
+where \fBxmpgedit\fR was installed. These are the actions performed by
+the install process to configure the shared library loader:
+.RS 4
+\fB
+    echo /usr/local/lib >> /etc/ld.so.conf
+    /sbin/ldconfig
+\fR
+.RE
+.PP
+Sound playback is implemented using two mechanisms: 1) an external command
+line MP3 player capable of standard input file playback, and 2)
+the MPGLIB decoder library that ships with the LAME project.
+The default playback configuration uses the MPGLIB-based decoder 
+plugin \fBlibdecoder_mpg123.so\fR.
+.PP
+Two decoder plugin implementations ship with xmpgedit: \fBlibdecoder_popen.so\fR
+and \fBlibdecoder_mpg123.so\fR.  \fBlibdecoder_popen.so\fR will execute
+the \fBmp3decoder.sh\fR script for file playback. \fBlibdecoder_mpg123.so\fR is 
+implemented using the
+MPGLIB decoder library present in LAME.  This implementation also serves as 
+a sample implementation of a single process playback plugin that could be
+ported to the Microsoft Windows(R) operating systems, and other 
+operating systems that do not support the popen() system call.
+.PP
+xmpgedit attempts to load the playback plugin \fBlibmpgedit_decoder.so\fR when 
+file playback is specified.  When the decoder plugin is loaded, it is used for
+file playback.  When the decoder plugin cannot be loaded, the default
+action is to execute the \fBmp3decoder.sh\fR script. 
+.PP 
+\fBlibmpgedit_decoder.so\fR
+is installed as a symbolic link pointing to one of the playback plugins,
+\fBlibdecoder_mpg123.so\fR or \fBlibdecoder_popen.so\fR.  \fBmake install\fR
+installs the \fBlibdecoder_mpg123.so\fR playback plugin.
+\fBlibdecoder_popen.so\fR can be installed manually when use of a command
+line MP3 player is desired.
+.PP
+To use a different command line MP3 player, configure
+\fBlibdecoder_popen.so\fR as the playback plugin, then
+edit the \fBmp3decoder.sh\fR file to call the desired MP3 player.
+This shell script is then loaded by xmpgedit when performing file playback, 
+and provides the flexibility to specify any MP3 player that can play
+files from standard input.
+.SH IMPLEMENTATION LIMITATIONS AND ANOMALIES
+.HP 2
+\- Decoding of some MP3 files does not give good visualization results. This is
+because of limitations with the current skip frame decoding implementation. 
+A work-around has been found which improves visualization results. Use this
+command to decode files which give poor visualization results: 
+
+    mpgedit -D -d 1 input.mp3
+
+Note: You must first delete input.lvl before running this command.
+.HP 2
+\- Since release 0.6p1, \fBmpgedit\fR has been tested with MPEG 1 layer 1/2/3,
+MPEG 2 layer 1/2/3 and MPEG 2.5 layer 3 files.  Since MPEG 2.5 layer 1/2 files
+have the same frame
+header structure, it is assumed this program will function properly with
+such files, although no testing on files encoded with this format has occurred.
+These same issues apply to \fBxmpgedit\fR.
+.HP 2
+\- While it is possible with \fBxmpgedit\fR to join together files that 
+consist of differing encoding versions (MPEG-1 and MPEG-2, for example) and sample 
+rates (44.1KHz and 22.05KHz, for example), caution must be used.
+Although such a file is technically a legal encoding, it is doubtful that 
+all (or any, for that matter) MP3 players will be able to correctly
+render such a file.
+.HP 2
+\- Any ID3 tags present in input files are not present in the output from
+an edit. Output files must be tagged to restore ID3 information.
+.HP 2
+\- xmpgedit implements an MPEG audio frame header parser that is tolerant of
+many encoder errors, corrupted data, and files with formats that are not 
+strictly MPEG audio
+files.  When such an encoding error is encountered, all data between the
+last correctly encoded frame and the next recognized frame are silently skipped.
+Other programs, such as \fBmp3_check\fR, perform a more detailed validity 
+check and
+report where errors occur, and are likely to be more robust when handling 
+corrupted data files.
+.HP 2
+\- Using the \fBlibdecoder_mpg123.so\fR
+plugin, \fBmpgedit\fR properly plays all of the ISO MPEG conformance
+files, as well as MPEG 2/2.5 files encoded using \fBlame\fR.
+Two exceptions can be noted.  Win32 does not properly
+handle MPEG 2/2.5 files encoded at with a sample rate of 11025Hz/mono.  A work
+around in the \fBlibdecoder_mpg123.so\fR decoder plugin is implemented,
+but the sound quality suffers.  The MPEG 1 layer 1 mono test file
+\fBhttp://mpgedit.org/mpgedit/testdata/mpeg1/layer1/fl4.mp1\fR does not
+render properly.  All the data used to exercise \fBmpgedit\fR is located 
+at \fBhttp://mpgedit.org/mpgedit/testdata/mpegdata.html\fR.
+.HP 2
+\- During development, the previous name of the program was mp3edit.
+The final name \fBmpgedit\fR was settled on after much development 
+occurred. Because of this, many source files and function
+names are called mp3_. You will also see mpeg_ instead of mpg_ in
+some cases. 
+
+.SH ACKNOWLEDGEMENTS AND HISTORY
+The first prototype implementation of MP3 file editing was based upon
+the mp3_check program, written by Eric Bullen, 
+\fBhttp://sourceforge.net/projects/mp3check\fR.  Because the project goals 
+of mp3_check
+are different than mpgedit, the idea of integrating editing functionality
+into mp3_check was abandoned.  Many of the current command line options 
+for mpgedit can be traced to the early prototype work done with mp3_check.
+.PP
+mpgedit is a completely independent implementation from the early mp3_check
+editing prototype.  While some of the early ideas from this prototype 
+still exist in mpgedit, everything has been re-implemented.  
+.PP
+Finding reference material sufficiently complete to implement mpgedit was
+difficult.  The O'Reilly & Associates book "MP3: The Definitive Guide" by 
+Scot Hacker \fBhttp://www.oreilly.com/catalog/mp3/\fR,
+while accurate in its description of the MPEG audio file frame header
+structure, did not contain sufficient detail to fully implement the
+MPEG file parsing functionality.  The document that proved invaluable
+for completing the MPEG audio frame header parsing code was written by
+\fBPredrag Supurovic\fR, \fBhttp://www.dv.co.yu/mpgscript/mpeghdr.htm\fR.
+.PP
+The MPGLIB decoding engine comes from the MPG123 package, written
+by Michael Hipp (\fBwww.mpg123.de\fR). MPGLIB is released under the GPL.
+The version of MPGLIB used for building the \fBlibdecoder_mpg123.so\fR decoder
+plugin comes from the 3.90 alpha 7 version of LAME
+\fBhttp://sourceforge.net/projects/lame\fR.  
+Earlier versions of LAME do not include a shared library build of MPGLIB,
+which is needed when building the decoder plugin.  The MPGLIB that comes with
+\fBmpg123-0.59r\fR can also be used when linking the \fBlibdecoder_mpg123.so\fR
+plugin.  However, LAME appears to have fixed some bugs that mpg123 has not.
+.PP
+Special thanks go to Jared Benedict <\fBhttp://redjar.org/jared/\fR> and Public
+Radio Exchange <\fBhttp://www.prx.org/\fR> for the donation of a Macintosh
+G3 B&W computer. Completion of the port to Mac OSX 10.3 was possible
+using this system.
+.PP
+The initial port of the command line and curses mpgedit to Mac OSX 10.1
+was done with thanks to Tony Andrea <\fBtony.andrea@pobox.com\fR>.
+.PP
+Thanks to Colin Bell <\fBcpb@tklogic.net\fR> for helping with freshing the
+Mac OSX 10.1 port.
+
+.".SH FILES
+
+.SH SEE ALSO 
+\fBmpgedit\fR(1), \fBmp3decoder.sh\fR(1), \fBdecoder.so\fR(1),
+\fBdecoder_popen.so\fR(1), \fBdecoder_mpg123.so\fR(1)

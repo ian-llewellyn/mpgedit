@@ -1,0 +1,125 @@
+This is the binary tarball of mpgedit 0.72 beta for Linux.  This product has
+been built using egcs-2.91.66, with GLIBC version glibc-2.1.3-15.  This 
+should function on RedHat Linux 6x and 7x systems.  You may need to install
+required library components for proper operation.  mpgedit is dependent 
+on these RPM packages:
+
+    ncurses-4.2-25
+    glibc-2.1.3-15
+
+
+The RedHat 7.x release is dependent on these RPM packages:
+   glibc-2.2.5-34
+   ncurses-5.2-26
+   ElectricFence-2.2.2-8 (alpha releases only)
+
+
+Should this build not function for you, then download and build the 
+source tarball.
+
+
+INSTALLATION
+------------
+
+To install mpgedit, as root run: ./install.sh 
+
+This script will first prompt you for the install directory, /usr/local
+is the default.  Press enter to install in /usr/local.  Should
+/usr/local/lib not already be in your /etc/ld.so.conf file, it will be added,
+and ldconfig run.
+
+UNINSTALLATION
+--------------
+
+To uninstall mpgedit, as root run: ./install.sh -u
+
+This script will first prompt you for the uninstall directory, /usr/local
+is the default.  Press enter to uninstall mpgedit from /usr/local.  The
+/etc/ld.so.conf file is not updated by the uninstall script.
+
+FILE LIST
+---------
+                                                       README
+-rw-r--r--   1 number6  slocate      3803 Jan 29 15:28 decoder.so.1
+-rwxr-xr-x   1 number6  slocate      3519 Jan 29 17:34 install.sh*
+-rwxr-xr-x   1 number6  slocate     39343 Jan 29 15:28 libdecoder_mpg123.so*
+-rwxr-xr-x   1 number6  slocate     16734 Jan 29 15:28 libdecoder_popen.so*
+-rwxr-xr-x   1 number6  slocate    139047 Jan 29 15:28 libmpglib_mpgedit.so*
+-rw-r--r--   1 number6  slocate       119 Jan 29 16:20 mp3decoder.sh
+-rw-r--r--   1 number6  slocate       868 Jan 29 15:28 mp3decoder.sh.1
+-rwxr-xr-x   1 number6  slocate    125581 Jan 29 15:28 mpgedit*
+-rw-r--r--   1 number6  slocate     23350 Jan 29 15:28 mpgedit.1
+-rwxr-xr-x   1 number6  slocate     83959 Jan 29 15:50 mpgedit_nocurses*
+
+
+      Checksum                    File Name
+      --------                    ---------
+                                  README
+283742550a52c1170cf6d8ffab488847  decoder.so.1
+4b40fb734e88b87528be82e6dbe72d5e  install.sh
+cec6c602641a3f7c3de9523405504c07  libdecoder_mpg123.so
+29e2e65bb91337a6be299699fe7aabb7  libdecoder_popen.so
+4598d35581699c34bbdb5ea77c049190  libmpglib_mpgedit.so
+5d8f071f4ee72210dca900b43c185166  mp3decoder.sh
+c21cbed202aa197dd394c57c3929d54c  mp3decoder.sh.1
+1dc2942ae5e00c3afbe34985f521c934  mpgedit
+a672b04104c5388f30b5eb651533ab1a  mpgedit.1
+2558a9d039181067d3fc49f41bb34632  mpgedit_nocurses
+
+
+COPYRIGHT
+---------
+
+
+     mpgedit - MPEG 1/2/2.5 (MP3) audio file editor
+               Version 0.72 beta December 2005
+                   http://mpgedit.org
+        Copyright (C) 2001-2006 by Adam Bernstein
+
+
+Written by: Adam Bernstein <number6@mpgedit.org>, released under
+the GPL.  See "COPYING" for full details.
+
+The mpgedit audio playback plugins uses the MPGLIB decoding engine,
+from the MPG123 package, written by: Michael Hipp (www.mpg123.de)
+MPGLIB is released under the GPL.
+
+The version of MPGLIB used in this release comes from LAME 3.90 alpha 7,
+released under the GNU LESSER PUBLIC LICENSE.
+
+Copyrights (c) 1999,2000,2001 by Mark Taylor: LAME
+Copyrights (c) 1998 by Michael Cheng: LAME
+Copyrights (c) 1995,1996,1997 by Michael Hipp: mpglib
+
+curses.dll comes from the PDCurses 2.4 package (pdc24_vc_w32.zip),
+http://pdcurses.sourceforge.net/index.html
+
+The Gimp Toolkit (GTK) is used by xmpgedit, http://gtk.org.
+
+The Win32 installer uses Inno Setup (IS), Copyright (C) 1997-2003++
+Jordan Russell (http://www.jrsoftware.org/isinfo.php)
+
+The MD5 checksum library (http://sourceforge.net/projects/libmd5-rfc/)
+is Copyright (C) 1999, 2000, 2002 Aladdin Enterprises.
+All rights reserved.
+
+The libdecoder_mad.so playback plugin is implemented using libmad,
+libmad - MPEG audio decoder library, Underbit Technologies, Inc.
+Copyright (C)  2000-2004 Underbit Technologies, Inc.
+http://www.underbit.com/products/mad/
+
+The getopt.c win32/getopt.h sources are originally from GNU getopt,
+Copyright (C) 1987, 88, 89, 90, 91, 92, 1993, Free Software Foundation, Inc.
+
+audio_macosx.c: originally written by Guillaume Outters. AudioUnit version
+by Steven A. Kortze <skortze@sourceforge.net>
+
+audio_aix.c: Code by Juergen Schoew <juergen.schoew@unix-ag.org>;
+Tomas Oegren <stric@acc.umu.se>, (code for audio_close delay);
+Cleanups and testing by Niklas Edmundsson <nikke@ing.umu.se>.
+
+audio_hp.c, audio_oss.c, audio_win32.c, audio_sun.c: No attributions
+present in source code.  Originally part of mpg123 project, copyrights
+(c) 1995,1996,1997 by Michael Hipp.
+
+As well as additional copyrights as documented in the source code.

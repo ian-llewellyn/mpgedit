@@ -1,0 +1,29 @@
+.\" $Id: scramble_times.pl.1,v 1.2 2003/09/11 06:14:12 number6 Exp $
+."
+.TH scramble_times.pl 1 \" -*- nroff -*-
+.SH NAME
+scramble_times.pl \- Randomize mp3 file  start/stop times
+
+.SH SYNOPSIS
+.TP 9
+scramble_times.pl \fBinputfile.mp3\fR [ \fBscramble_file\fR ]
+.SH DESCRIPTION
+\fBscramble_times.pl\fR is a Perl script that generates a list of 
+start/stop times for each frame in \fBinputfile.mp3\fR printed in 
+pseudo-random order. This script is called from \fBscramble.pl\fR.
+The output from \fBscramble_times.pl\fR is printed to standard output,
+or written to the output file \fBscramble_file\fR when specified.
+
+\fBscramble_times.pl\fR works by calling \fBmpgedit -vv inputfile.mp3\fR
+to first obtain a list of all frame end times for \fBinputfile.mp3\fR.
+From this output, a list of frame start/stop times is created. Afterwards,
+this list is shuffled in pseudo-random order, then printed to standard
+output, or written to \fBscramble_file\fR when specified.
+
+.SH BUGS
+\fBscramble_times.pl\fR serves no useful purpose outside of the
+context of the test script \fB scramble.pl\fR.
+
+.SH SEE ALSO 
+\fBscramble.pl\fR(1), \fBunscramble.pl\fR(1),
+\fBmpgedit\fR(1), \fBxmpgedit\fR(1).

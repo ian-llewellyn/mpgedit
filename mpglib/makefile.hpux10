@@ -1,0 +1,15 @@
+CC           = c89
+CFLAGS       = +DA1.0 +z -DHAVE_MEMCPY -Dlint -DNOANALYSIS $(CDEBUGFLAGS) $(CFLAGS1)
+CFLAGS1      = -I../include -I../libmp3lame 
+#CDEBUGFLAGS = -g
+
+all: libmpglib_mpgedit.sl
+
+lib_objs = common.o dct64_i386.o decode_i386.o layer3.o tabinit.o interface.o
+
+libmpglib_mpgedit.sl: $(lib_objs)
+	/usr/bin/ld +b/usr/local/lib -b -a shared_archive -ldld -E \
+	-o libmpglib_mpgedit.sl $(lib_objs) -lm
+
+clean:
+	rm -f $(lib_objs) libmpglib_mpgedit.sl

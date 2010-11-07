@@ -1,0 +1,439 @@
+TODO for 0.7 beta release:
+
+- http://www.borg.com/~jglatt/tech/mixer.htm
+  Win32 MIXER examples
+* Done
+
+Look into changing idle proc scheduling to give more time to the
+idle function.  This will make playback have fewer interruptions when
+manipulating the GUI.
+
+- FIX "Testing" section in dist_linux.sh  The Bourne shell references
+  are broken.
+*done. Bourne shell is no longer mentioned.
+
+- mpgedit bug fix:  Load some mp3 files in the editor. Specify one bad
+  file name.  Then save  abandoned edits, quit mpgedit.  Start mpgedit, and
+  load abandoned edits.  The editor is now messed up, because the bad file
+  reserves a spot in the editor that messes up the cursor position.
+  * Done.  Fixed 11/29/05.
+
+Display error dialog when named abandoned edits file fails to load; most
+likely cause is file does not exist.
+
+- Search gtk mail archive for this:
+  gtkclist usage
+  See clist2.c/clist3.c example
+  *done.  Using gtkclist now in main scrolled window..
+
+
+Assume .mp3 extension for file names specified.  Make specification
+of just the base name work when .mp3 is left off.
+
+Double click on file in file selection dialog needs to emit a select
+event so the file is indexed.
+  Done: 10/20/2002
+
+Load abandoned edits, specify a file name different than the default provided,
+set output file name, then do edit.  The defaulted
+save abandoned file name is not what was just loaded.
+
+Copy/paste of line should fill in start time from previous line's end time.
+  *Done
+
+use __declspec(dllexport) for plugin function prototypes, and can dump
+use of .def file.
+  Done: 10/23/2002.
+
+Add a clear editor button to discard all entries currently listed in the
+editor GUI.
+  Done: 10/13/2002
+
+Modify the file select dialog to fill in the last clicked file name into the
+text file name selection widget.
+  Done:
+
+Only write to abandon edits file when edit configuration has changed.
+Add concept of "dirty" that must be written.
+
+add to playif callback for file indexing.
+  This approach does not work.  Had to refactor code
+  to perform file indexing and file editing in an
+  iterative fashon.  
+  Done: 9/2/2002
+
+Volume control for xmpgedit
+  Done: 9/24/2002
+
+Volume control must poll for volume changes from external mixer. Not sure
+I want to implement this.  Efficiency problem.
+
+
+When adding a new edit line (copy/paste), and the new line scrolls off the
+bottom of the screen, reposition the scroll window to display the bottom line.
+  Done.
+
+Add Save Abandoned edits button, that does not perform file edits, just
+saves abandoned edits to file.
+  Done. NOt a button, but a save session menu item.
+
+When copy/paste a line, make the start time of the paste line the
+end time of the copied line.
+
+Make the File: entry editable, so user can directly input file name, 
+instead of being forced to use file selection widget.
+mpgedit fails to open file when is a symbolic link not pointing at a valid file
+  Done.
+
+http://prdownloads.sourceforge.net/sox/sox12172.zip
+http://www.hot.ee/smpman/mp3/Lame392.zip
+http://downloads.activestate.com/ActivePerl/Windows/5.6/ActivePerl-5.6.1.633-MSWin32-x86.msi
+
+- Make this command line work: mpgedit -c -e1-2 -f a.mp3 -e3-4 -f b.mp3
+  This loads the input files into curses, but not the edit times.
+  *Done, works now.
+
+- FIX MAN PAGE GENERATION!!! All of the see also links are broken!!!
+
+- Eliminate -c option from usage in the nocurses build
+
+- Fix audio_win32.c to allow mono playback.  Currently nChannels is
+  hard coded to 2.  See how audio_oss.c did this.
+  *Done.
+
+- Allow output name of -o -, so you can stream
+  edits to stdout.
+  Not sure this is possible.  Seek to start to fix Xing header cannot be done,
+  for example.
+
+
+- Update all of the windows RC files versions
+
+- Add tests for Xing header update to test1.sh
+  Done.  See test1.pl.
+
+- Add rules to makefile.win32 and other platforms for mpgedit_buildnum.h
+  Done for win32, probably need to deal with other platforms still.
+
+- Xing header editing is not correct for versions other than MP1 layer 3
+* Done
+
+- Add to man2html script removal of broken local host links.
+* Done
+
+- There is a bug in the XING header update code, when using the
+  curses interface to perform multiple edits on one input file,
+  writing outputs to the same output file. Example is pdreams111.mp3 
+  file.  This only fails when you play back a segment in curses
+  before performing the edit.
+
+Updating VBR information frames=23352 size=12685989
+Updating VBR information frames=46321 size=25567857
+Updating VBR information frames=69290 size=37974425
+
+  * Done.  This was due to a flushing bug in glibc.
+  
+- Add '-V' to usage().
+  * Done.
+
+- Don't load audio plugin until playback has actually been selected.
+
+- Credit win32 getopt() source code as coming from Win32 Samba project
+
+- Don't count the final frame of ID3 data in the CBR/VBR statistics.  A
+  CBR encoded file appears to be VBR because the final frame contains
+  ID3 tag data with a frame header indicating the bitrate is different
+  than the rest of the data in the file.
+
+- Curses SIGSEGV when specify bad input file name, then jjjkkkkjjjkkk
+  (only noticed on Solaris, maybe fixed)
+
+- Backspace key does not work on Solaris in Curses
+  (keyboard mapping for backspace key is not preserved)
+
+- This does not work properly in curses:
+  f
+  ^U
+  esc
+  k
+The default input file name re appears when you line up.  
+Well, the only problem I'm seeing now is the file name does not get refreshed
+until you line up. -Input File - is not displayed.
+  *Done, This works now.
+
+- Fix ATrain.mp3.  0.6b breaks at frame 26; 25 is last good frame.
+  Good offset: 10031 (0x272f)                            frame 25
+  Good offset: 10048 (0x28d0)  Bad offset 10657 (0x29a1) frame 26
+  Fixes now have it messing up at offset 001b8d0 (001b8d1) Frame 271
+
+
+FILE_NAME           ATrain.mp3
+GOOD_FRAMES         3226
+BAD_FRAMES          345
+LAST_BYTE_CHECKED   1375209
+VBR_HIGH            416
+VBR_LOW             8
+VBR_AVERAGE         64
+SONG_LENGTH         02:48.43
+
+USER_TIME           0.55s
+SYS_TIME            0.05s
+
+I think the problem is the computation of frame size for MPEG 2 audio is
+wrong.  The frame sizes are 208/209 bytes, not 417/418.  mpg123 seems to 
+confirm this also, BPF: 208.  mp3_check-1.98 confirms this
+(mp3_check -vvvv ATrain.mp3)
+
+                      0x80             - no pad
+                      0x82             - pad
+                           0x54        - Joint stereo/IS=on MS=off
+                           0x74        - Joint stereo/IS=on MS=on
+0    000000 0xff 0xf3 0x80 0x54 : 208
+208  0000d0 0xff 0xf3 0x82 0x74 : 209
+417  0001a1 0xff 0xf3 0x82 0x54 : 209
+626  000272 0xff 0xf3 0x82 0x54 : 209
+835  000343 0xff 0xf3 0x82 0x74 : 209
+1044 000414 0xff 0xf3 0x82 0x74 : 209
+1253 0004e5 0xff 0xf3 0x82 0x74 : 209
+1462 0005b6 0xff 0xf3 0x82 0x74 : 209
+1671 000687 0xff 0xf3 0x82 0x74 : 209
+1880 000758 0xff 0xf3 0x82 0x74 : 209
+2089 000829 0xff 0xf3 0x82 0x74 : 209
+2298 0008fa 0xff 0xf3 0x82 0x54 : 209
+2507 0009cb 0xff 0xf3 0x82 0x54 : 209
+2716 0009cb 0xff 0xf3 0x82 0x54 : 209
+
+... 
+6896 good
+  * done
+
+  - Rage\ Against\ The\ Machine\ -\ Wake\ Up.mp3 breaks, because it is
+incorrectly encoded, around 309s.   The last good frame is here:
+
+
+t=309.571s  br=192  sz=626  fr=11851  pos=7418701    pos=0x71334d
+
+What is wrong is the following frame has 2 extra bytes before the
+next frame header.  See what can be done to re-sync
+
+
+t=309.597s  br=192  sz=626  fr=11852  pos=7419780    pos=0x713784
+t=309.624s  br=192  sz=626  fr=11853  pos=7420686    pos=0x713b0e
+t=309.658s  br=56   sz=4096 fr=11854  pos=7421312    pos=0x713d80
+
+
+
+Patched: 
+t=309.571s  br=192  sz=626  fr=11851  pos=7419955    pos=0x713833
+t=309.597s  br=192  sz=626  fr=11852  pos=7422183    pos=0x7140e7
+t=309.624s  br=192  sz=626  fr=11853  pos=7424133    pos=0x714885
+t=309.650s  br=192  sz=626  fr=11854  pos=7425805    pos=0x714f0d
+t=309.676s  br=192  sz=626  fr=11855  pos=7427199    pos=0x71547f
+t=309.702s  br=192  sz=626  fr=11856  pos=7429250    pos=0x715c82
+t=309.728s  br=192  sz=626  fr=11857  pos=7430782    pos=0x71627e
+t=309.754s  br=192  sz=626  fr=11858  pos=7433006    pos=0x716b2e
+t=309.780s  br=192  sz=626  fr=11859  pos=7433632    pos=0x716da0
+t=309.806s  br=192  sz=626  fr=11860  pos=7434258    pos=0x717012
+t=309.833s  br=192  sz=626  fr=11861  pos=7434884    pos=0x717284
+t=309.859s  br=192  sz=626  fr=11862  pos=7435510    pos=0x7174f6
+t=309.885s  br=192  sz=626  fr=11863  pos=7436136    pos=0x717768
+t=309.911s  br=192  sz=626  fr=11864  pos=7436762    pos=0x7179da
+t=309.937s  br=192  sz=626  fr=11865  pos=7437388    pos=0x717c4c
+t=309.963s  br=192  sz=626  fr=11866  pos=7438014    pos=0x717ebe
+t=309.989s  br=192  sz=626  fr=11867  pos=7438640    pos=0x718130
+t=310.015s  br=192  sz=626  fr=11868  pos=7439266    pos=0x7183a2
+
+
+  ===========================================================================
+
+
+TODO for 0.6 beta release:
+
+- Change elapsed time "animation" to display only every 10th frame, 
+  or every 1 second increment, instead of each frame.
+  Already displays every 1 second elapsed time when indexing.
+  * done
+
+
+- Change creation of output files to a different directory when
+  default source directory is read-only (CD-ROM source). Using the pwd
+  would make the most sense.
+  * Done
+
+- Accept multiple filenames on command line when entering curses mode (-c flag)
+  * Added functionality.  * Done 1/12/2001
+
+- Verify that man page is correct in saying libdecoder_mpg123.so is
+  the default install for sound playback.
+*done
+
+- Add channel mode / Joint stereo decode to -vvv option.  Change man page
+  to reflect this addition
+*done
+
+- Make -vvv display consistent showing data values followed by
+  decode of those values
+  * Done
+
+- Fix SIGSEGV with commands like: mpgedit -e- f1.mp3 f2.mp3 f3.mp3
+  * Done
+
+- Default behavior of just reading file does not work with current
+  implementation of multiple input files allowed without -f on command line.
+  Need to fix this.  If no -e is specified, then just read.
+  * Done
+
+- Add same playback buffering found in Win32 plugin to UNIX playback plugin
+  * Done.  The mpglib playback code is the same between UNIX and Win32, 
+    by using the audio_interface abstraction from mpg123.
+
+- Index file name is dir_file.idx when source directory is read-only??
+  * mpgedit now correctly writes into the cwd when the source directory
+    is read only.
+
+- Add DLL version information
+  * Done
+
+- Add curses command help screen
+*done
+
+- Add version option to mpgedit (Added -V)
+  * Done
+
+- Redesign shared library loading.  Problem: picks up installed version
+  ahead of the local development version. Other problem is if an entry
+  point fails to resolve, the default is zero'ed out. Error messages are 
+  lost for each symbol resolution.
+  * Search path issue is not handled.  Rest of these problems have been
+    corrected.
+
+- May be file parsing problem.  Look at Mark Stover CBS Radio mystery theater 
+  MP3 files as example.  
+  * (mpgedit handles these files correctly)
+
+- Fix problem with sub-second file seek
+  * (Done)
+
+- Make new new index file format compatible with old format.  Need to 
+  include a header in the index to indicate version.  As old index
+  format has 0s in the first 4 bytes, this will be easy.
+  * (Done)
+
+- Make index file format compatible across platforms.  Write values in
+  network byte order.
+  * (Completed and tested)
+
+- Load a saved edit list. Jump to bottom of list.  Delete entries from bottom.
+  Cursor positioning is messed up 
+  * (Fixed)
+  
+- Only redirect stderr to /dev/null when in curses mode.  Reset stderr
+  after leaving curses mode
+  * Done
+
+- Remove configure build from project
+*done
+
+- Fix curses start/end time validation.  Start of 0:0 and end of 0:0 should 
+  be accepted;  same as command line -e- edit spec.  End time beyond EOF
+  should be detected in curses mode, not after leaving to do edit.
+*done
+
+- Verify index file matches mp3 file, by comparing file size in index file
+  with mp3 file size.  Re-index if they do not match
+*done
+
+- Fix this core dump: 
+*done
+(breaks)  mpgedit -f test2_1.mp3 -f test2_2.mp3 -e-  -o test2_splice.mp3 
+(works)   mpgedit -o test2_splice.mp3 -e- test2_1.mp3 test2_2.mp3        
+          mpgedit -e- -f test2_1.mp3 -f test2_2.mp3  -o test2_splice.mp3 
+          mpgedit -f test2_1.mp3 -e- -f test2_2.mp3  -o test2_splice.mp3 
+          mpgedit -f test2_1.mp3 -f test2_2.mp3  -o test2_splice.mp3 -e- 
+ 
+
+- Fix for files with these properties:
+  Arbitrary string of 0's before first valid frame
+  File ends with ID3 tag
+  mpgedit was not properly handling these files.  
+  Need to add test case to prove this type of file is correctly processed.
+*done
+
+
+- Fix to not invalidate index file when mp3 file has ID3 tag.  Length
+  is incorrect by 128 bytes in this case.
+*done
+
+- Remove index file if hopelessly corrupt, and recreate (maybe just
+  0 length file is enough).
+*done
+
+- Add test where more than 4096 bytes of junk follows the last valid frame
+  in mp3 file.  This was causing an infinite loop in index file creation.
+  Bad_20Company_20-_20Rock_20n_20Roll_20Fantasy.mp3.
+*done
+
+- Index file validation fixup.  If file sizes do not match, then if
+  the position of the last valid frame is a frame header, accept
+  index file.
+*done
+
+- read_next_mpeg_frame () is not correct when scanning for a following
+  frame.  It is using the output argument "header" when doing the
+  scanning.  This means that the previous valid header can be lost.  It is
+  also not retaining the previous state of "found" when doing this 
+  search.
+*done
+
+- Fix MPEG 2 audio file processing (ATrain.mp3)
+  * done
+
+
+- Stuff needed to package GTK+2 in a disk image:
+===
+PANGO_RC_FILE=/tmp/pangorc
+GDK_PIXBUF_MODULE_FILE=/tmp/gdk-pixbuf.loaders
+
+#DYLD_LIBRARY_PATH=/sww/lib
+
+#
+# pangorc file for uninstalled operation. If pango-viewer is run with
+# this file in the current directory it will set it as PANGO_RC_FILE
+#
+
+[Pango]
+ModuleFiles = /tmp/pango.modules
+
+[PangoX]
+AliasFiles = /tmp/pangox.aliases
+
+/tmp/pkgroot/xmpgedit.app/Contents/MacOS/etc/gdk-pixbuf.loaders
+/tmp/pkgroot/xmpgedit.app/Contents/MacOS/etc/pango.modules
+/tmp/pkgroot/xmpgedit.app/Contents/MacOS/etc/pangorc
+
+===
+
+List uses for mpgedit
+http://panteltje.com/panteltje/dvd/
+
+
+===========
+How to split mp3 files without reencoding
+
+I used mpgedit(1) and the while-loop from bash.
+
+(1) http://www.mpgedit.org/mpgedit/
+
+I'm not very proud of this quick and dirty script for cutting large mp3-files in pieces of the same length:
+
+#!/bin/bash
+m=0;	# will be used for starttime of a segment, first segment starts at 0secs
+n=0;    # will be used for endtime of a segment
+c=70;	# number of files you want to have
+l=900;	# length in secs for a segment
+while [ "$c" -gt 0 ]; do n=$[n+l];
+  ./mpgedit -e $m-$n /path/file.mp3; 
+  m=$n; 
+  c=$[c-1]; 
+done
+===========

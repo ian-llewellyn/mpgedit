@@ -1,0 +1,14 @@
+#
+# mp3get: streaming mp3 download utility makefile
+#
+# Copyright (C) 2004 Adam Bernstein
+#
+
+CFLAGS   = $(INCLUDES)
+INCLUDES = -I../../ -I../../mpglib
+
+mp3get: mp3get.o httpget.o
+	$(CC) $(CFLAGS) $(LDFLAGS) mp3get.o httpget.o -o mp3get
+
+clean:
+	$(RM) mp3get.o httpget.o

@@ -1,0 +1,31 @@
+              mp3get - streaming mp3 download utility
+                       http://mpgedit.org
+      Copyright (C) 2004, Adam Bernstein. All Rights Reserved.
+
+Written by: Adam Bernstein <number6@mpgedit.org>, released under
+the GPL.  See "COPYING" for full details.
+
+The file httpopen.c comes from the mpg123 package <http://www.mpg123.org>, and
+was originally written by  Oliver Fromme <oliver.fromme@heim3.tu-clausthal.de>.
+
+ ==============================================================================
+ - See INSTALL for compilation directions.
+
+   Please report bugs to: number6@mpgedit.org
+ ==============================================================================
+
+mp3get is a streaming MP3 download utility.  The usage is:
+
+  mp3get [ -s maxbytes] [ -o savefile.mp3 ] URL
+
+Where:
+  -s maxbytes    : sets the total number of bytes downloaded from URL.
+  -o savefile.mp3: names the MP3 data output file.  When not specified, all
+                   data is streamed to stdout.
+  URL            : URL of the streaming MP3 server.
+
+Example:
+  Save 1MB of MP3 data from the WCPE streaming MP3 server:
+
+    ./mp3get -s 1000000 -o wcpe.mp3 http://audio.ibiblio.org:8000/wcpe
+

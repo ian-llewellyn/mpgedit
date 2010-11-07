@@ -1,0 +1,8 @@
+COMPILATION
+-----------
+Linux:
+  ln -s makefile.linux makefile
+  make
+
+Win32:
+  nmake -f makefile.win32

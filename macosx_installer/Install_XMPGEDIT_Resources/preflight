@@ -1,0 +1,15 @@
+#!/bin/sh
+gdkpixbuf="/xmpgedit.app/Contents/MacOS/etc/gdk-pixbuf.loaders"
+pangomod="/xmpgedit.app/Contents/MacOS/etc/pango.modules"
+pangorc="/xmpgedit.app/Contents/MacOS/etc/pangorc"
+
+echo "preflight here 1='$1'" >> /tmp/xmpgedit_out.txt
+echo "preflight here 2='$2'" >> /tmp/xmpgedit_out.txt
+echo "preflight here 3='$3'" >> /tmp/xmpgedit_out.txt
+echo "preflight here 4='$4'" >> /tmp/xmpgedit_out.txt
+
+# $2 contains the install directory path
+#
+
+# Modify gdk-pixbuf.loaders first...
+#

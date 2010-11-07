@@ -1,0 +1,18 @@
+CC          = xlc
+CFLAGS      = -DHAVE_MEMCPY -DSTDC_HEADERS -Dlint  -D__DECALPHA__ -D_ALL_SOURCE -DNOANALYSIS $(CDEBUGFLAGS) $(CFLAGS1)
+
+CFLAGS1     = -I../include -I../libmp3lame 
+
+#CDEBUGFLAGS = -g
+
+#CDEBUGFLAGS = -O3
+
+all: libmpglib_mpgedit.so
+
+lib_objs = common.o dct64_i386.o decode_i386.o layer3.o tabinit.o interface.o
+
+libmpglib_mpgedit.so: $(lib_objs)
+	$(CC) -berok -bnoentry -bM:SRC -brtl -o libmpglib_mpgedit.so $(lib_objs) -lm -bE:mpglib.def
+
+clean:
+	rm -f $(lib_objs) libmpglib_mpgedit.so

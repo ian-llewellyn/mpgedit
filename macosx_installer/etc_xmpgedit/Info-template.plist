@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleGetInfoString</key>
+	<string>XMPGEDIT __MAJOR__.__MINOR__ __RELTYPE____CKPOINT__</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.mpgedit.MPGEDIT</string>
+	<key>CFBundleName</key>
+	<string>XMPGEDIT</string>
+	<key>CFBundleShortVersionString</key>
+	<string>__MAJOR__.__MINOR__ __RELTYPE____CKPOINT__</string>
+	<key>IFMajorVersion</key>
+	<integer>__MAJOR__</integer>
+	<key>IFMinorVersion</key>
+	<integer>__MINOR__</integer>
+	<key>IFPkgFlagAllowBackRev</key>
+	<false/>
+	<key>IFPkgFlagAuthorizationAction</key>
+	<string>AdminAuthorization</string>
+	<key>IFPkgFlagDefaultLocation</key>
+	<string>/Applications</string>
+	<key>IFPkgFlagInstallFat</key>
+	<false/>
+	<key>IFPkgFlagIsRequired</key>
+	<false/>
+	<key>IFPkgFlagRelocatable</key>
+	<true/>
+	<key>IFPkgFlagRestartAction</key>
+	<string>NoRestart</string>
+	<key>IFPkgFlagRootVolumeOnly</key>
+	<false/>
+	<key>IFPkgFlagUpdateInstalledLanguages</key>
+	<false/>
+	<key>IFPkgFormatVersion</key>
+	<real>0.10000000149011612</real>
+</dict>
+</plist>

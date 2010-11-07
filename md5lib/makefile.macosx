@@ -1,0 +1,13 @@
+CFLAGS = -fPIC -Dlint -Wall -D__macosx $(CDEBUGFLAGS) $(CFLAGS1)
+
+CDEBUGFLAGS = -O3
+CFLAGS1     = -Iinclude -Ilibmp3lame -Impglib
+
+example: example.o md5.o
+	$(CC) $(LDFLAGS) -o example example.o md5.o
+
+md5main: md5main.o md5.o
+	$(CC) $(LDFLAGS) -o md5main md5main.o md5.o
+
+clean:
+	rm -f example.o md5.o md5main.o

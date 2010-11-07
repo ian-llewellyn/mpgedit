@@ -1,0 +1,14 @@
+CC = CL
+CDEFINES = /DNOANALYSIS /DSTDC_HEADERS /DUSE_LAYER_1 /DUSE_LAYER_2
+CFLAGS = /nologo $(CDEFINES) /GD /O2 /W3 /I..\include /I..\libmp3lame
+
+OBJS = common.obj  dct64_i386.obj decode_i386.obj \
+       layer1.obj layer2.obj layer3.obj tabinit.obj interface.obj
+
+all: mpglib.lib
+	
+mpglib.lib: $(OBJS)
+	lib /nologo /out:mpglib.lib $(OBJS)
+
+clean:
+	del $(OBJS) mpglib.lib

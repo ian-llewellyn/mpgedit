@@ -1,0 +1,13 @@
+Special thanks go to Jared Benedict <http://redjar.org/jared/> and Public
+Radio Exchange <http://www.prx.org/> for the donation of a Macintosh
+G3 B&W computer. Completion of the port to Mac OSX 10.3 was possible
+using this system.
+
+The Python mpgedit Pyrex wrapper, py_mpgedit, was written by Bryan 
+Weingarten, <bryan.weingarten@mpgedit.org>.
+
+The initial port of the command line and curses mpgedit to Mac OSX 10.1 
+was done with thanks to Tony Andrea <tony.andrea@pobox.com>.
+
+Thanks to Colin Bell <cpb@tklogic.net> for helping with freshing the Mac
+OSX 10.1 port.

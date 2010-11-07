@@ -1,0 +1,625 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>py_mpgedit</title>
+</head>
+<body>
+
+<table width="100%">
+    <tr>
+  		<td>
+            <h1>py_mpgedit SDK</h1>
+  				<h2>beta 0.3</h2>
+  		    <h2>Python bindings to the mpgedit audio file editor</h2>
+  		</td>
+			<td align="right"><img src="python_297x100.png"></td>
+		</tr>
+</table>
+
+<hr />
+
+<h2>Summary</h2>
+
+py_mpgedit is a python extension module that wraps the mpgedit sdk.  py_mpgedit 
+tries to keep the look and feel of the mpgedit API and be as python friendly 
+as possible.  Eventhough py_mpgedit is versioned at beta 0.3, the mpgedit SDK 
+that it wraps is at beta 0.74, has been out for quite a while now and is very stable.
+
+<p />
+Currently simply_play.py and simple_edit.py are the only example which are included 
+in the SDK.  
+
+<p />
+If you have any questions, suggestions, want to report a bug, need an enhancement or 
+feature, please feel free to <a href="mailto:bryan.weingarten@mpgedit.org">email</a> me.
+
+<p />
+The latest version can be downloaded
+<a href="../download_sdks.html">here</a>.
+
+<p />
+<h3>Requirements</h3>
+py_mpgedit is a python wrapper that uses the ctypes module. Ctypes is officially available in Python version 2.5. 
+The ctypes module is available for Python 2.4 and earlier releases from 
+<a href="http://sourceforge.net/projects/ctypes/">SourceForget.net</a>.
+
+<p />
+<h3>Classes</h3>
+<ul>
+<li><a href="#Play">mpgedit.Play</a></li>
+<li><a href="#Index">mpgedit.Index</a></li>
+<li><a href="#Spec">mpgedit.EditSpec</a></li>
+<li><a href="#Edit">mpgedit.Edit</a></li>
+<li><a href="#MpgeditError">mpgedit.MpgeditError</a></li>
+</ul>
+
+<p />
+Samples:
+<ul>
+<li><a href="#Sample_Minimal">Minimal example of editing and playing</a>
+<li><a href="#Sample_Play">Playing with callbacks</a>
+<li><a href="#Sample_Edit">Editing with callbacks</a>
+</ul>
+
+<p />
+Terms and conditions for accessing or otherwise using py_mpgedit is 
+<a href="py_mpgedit_license.htm">here</a>.
+
+<hr />
+
+<h2><a name="Play">mpgedit.Play</a></h2>
+
+<p />
+<dl>
+    <dt><b><tt>class Play(mp3file)</tt></b></dt>
+		<dd>
+  		Constructor for the Play class.  <code>mp3file</code> is the name of the 
+  		mp3 file to play.  <code>mp3file</code> may contain a relative or 
+  		absolute path.  To close or free a Play instance, either 
+  		have the object instance go out of scope, explicitly decrement the 
+  		reference count with the <code>del</code> command, or call this object's 
+  		<code>close()</code> method.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>play(callback=None)</tt></b></dt>
+		<dd>
+  		Play the mp3 file.  If a <code>callback</code> is provided, 
+  		<code>play</code> will call the function callback with two arguments, 
+  		sec and msec, which is the time offset of the current frame being played.
+  		The callback function must return a boolean True value to tell 
+  		<code>play</code> to continue playing, otherwise, <code>play</code> will stop.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>stop()</tt></b></dt>
+		<dd>
+  		Notify the file currently playing in a thread to stop. The file will continue 
+                playing from the point it was stopped by calling <tt>play</tt>. 
+                Calling <tt>stop</tt> has no effect when a file is not playing.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>seek_time(sec, msec)</tt></b></dt>
+		<dd>
+  		Sets the mp3 file's current position to the frame corresponding to 
+  		<code>sec</code> and <code>msec</code>.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>total_size()</tt></b></dt>
+		<dd>
+  		Returns the total size in bytes of the mp3 file.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>total_time()</tt></b></dt>
+		<dd>
+  		Returns the total time of the mp3 file.  The return value is a 2-tuple 
+  		<code>(sec, msec)</code>. 
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>total_info()</tt></b></dt>
+		<dd>
+  		Returns the total size and total time of the mp3 file.  The return value 
+  		is a 2-tuple <code>(size, (sec, msec))</code>.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>current_time()</tt></b></dt>
+		<dd>
+  		Returns the current time of the mp3 file.  The return value is a 2-tuple
+  		<code>(sec, msec)</code>.  
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>get_volume()</tt></b></dt>
+		<dd>
+  		Returns the current volume of the system.  The return value is a 2-tuple
+  		<code>(lvol, rvol)</code> and both value are in the range 0 to 100.  
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>set_volume(lvol, rvol=-1)</tt></b></dt>
+		<dd>
+  		Sets the current volume of the system.  Both <code>lvol</code> and 
+  		<code>rvol</code> are in the range 0 to 100.  If only lvol is specified,
+  		both left and right volumes are set to <code>lvol</code>.
+  		<p />
+  		Note: In the current Windows implementation, the right volume is always 
+  		set to <code>lvol</code>.  This will be fixed in a future version of the
+  		mpgedit SDK.  If this is an issue for anyone at this time, please let us know.  
+		</dd>
+</dl>
+
+
+<p />
+<dl>
+		<dt><b><tt>close()</tt></b></dt>
+		<dd>
+  		Frees all resources of this object.  After this method is called, this 
+  		object instance cannot be used again.  This objects __del__ method calls
+  		<code>close()</code>.  So having the object go out of scope is usually 
+  		good enough and an explicit call to close in not required.
+		</dd>
+</dl>
+
+<hr />
+
+<h2><a name="Index">mpgedit.Index</a></h2>
+
+<p />
+<dl>
+		<dt><b><tt>class Index(mp3file)</tt></b></dt>
+		<dd>
+  		Constructor for the Index class. <code>mp3file</code> is the name of the 
+  		mp3 file to index.  <code>mp3file</code> may contain a relative or 
+  		absolute path.  To close or free a Index instance, either have the object 
+  		instance go out of scope, explicitly decrement the reference count with 
+  		the	<code>del</code> command, or call this object's <code>close()</code> 
+  		method.
+  		<p />				
+        Indexing is required anytime you want to access an mp3 file by
+        an edit time, as specified by an <code>mpgedit.Spec</code>.  Normally, 
+        all operations require the index file.  Play does not when you are playing 
+        from the start of the file. However, when you want to seek to a time, then
+        play, you must have the index file.				
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>index(callback=None)</tt></b></dt>
+		<dd>
+  		Creates an index file.  If a <code>callback</code> is pass in, <code>index</code> 
+  		will call the function callback with the arguments (sec, msec, offset). 
+  		The callback function must return a boolean True value to tell <code>index</code>
+  		to continue indexing, otherwise, <code>index</code> will stop.				
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>frames()</tt></b></dt>
+		<dd>
+        Returns the number of the frames indexed at this position.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>time()</tt></b></dt>
+		<dd>
+  		Returns the time offset for the current indexed position.  The return value is a 2-tuple 
+  		<code>(sec, msec)</code>. 
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>offset()</tt></b></dt>
+		<dd>
+        Returns the byte offset for the current indexed position.  
+		</dd>
+</dl>
+
+<hr />
+
+<h2><a name="Spec">mpgedit.EditSpec</a></h2>
+
+<p />
+<dl>
+		<dt><b><tt>class EditSpec()</tt></b></dt>
+		<dd>
+  		Constructor for the EditSpec class.  To close or free a EditSpec instance, either 
+  		have the object instance go out of scope, explicitly decrement the
+  		reference count with the <code>del</code> command, or call this object's	
+  		<code>close()</code> method.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>append(mp3file, timespec)</tt></b></dt>
+		<dd>
+        Appends an edit definition for an mp3 file to the editspec.	<code>mp3file</code> 
+        is the name of an mp3 file to edit.  <code>mp3file</code> may contain a 
+        relative or absolute path.  <code>timespec</code> is a string that 
+        specifies the start and stop times of the edit to perform on the named 
+        mp3 file.  The general form of this time specification is 
+        'MM:ss.mmm-MM:ss.mmm' where MM is minutes, ss is seconds and mmm is 
+        milliseconds.  Any of these fields may be omitted.  When the start time 
+        specification is omitted, the edit is performed from the start of the mp3 
+        file to the specified end time.  When the end time is omitted, the edit
+        is performed from the specified start time to the end of the mp3 file. 
+        The entire file may be included in the edit by specifying "-".  For example,
+        the timespec string "20-30.500" defines an edit starting 20 seconds from 
+        the start of mp3file, and ending at 30 seconds 500 milliseconds.  The 
+        econds specifier can be greater than 60.  For example, "95-1000" is 
+        equivalent to "1:35-16:40".
+        <p />                                																																
+        Please refer to the mpgedit sdk documentation for the complete format.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>__iadd__(editspec, start_timespec)</tt></b></dt>
+		<dd>
+        Similar to <tt>append</tt> but takes either a single <tt>start_timespec</tt> or
+        the two <tt>start_timespec</tt> <tt>end_timespec</tt> values.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>filename(offset)</tt></b></dt>
+		<dd>
+        Returns the file name associated with editspec at the location specified by
+        <code>offset</code>.  The first entry in editSpec is accessed when the value 
+        of offset is zero.  An empty string is returned when offset is out of bounds.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>length()</tt></b></dt>
+		<dd>
+        Returns the number of edit definitions appended to editspec.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>start_time(offset)</tt></b></dt>
+		<dd>
+        Returns the start time associated with the editspec at the location specified 
+        by <code>offset</code>.  The return value is 2-tuple <code>(sec, msec)</code>.
+        An IndexError exception is raised if offset is out of bounds.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>end_time(offset)</tt></b></dt>
+		<dd>
+        Returns the end time associated with the editspec at the location specified 
+        by <code>offset</code>.  The return value is 2-tuple <code>(sec, msec)</code>.
+        An IndexError exception is raised if offset is out of bounds.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>__getitem__(offset)</tt></b></dt>
+		<dd>
+        Returns the filename, start time and end time associated with the 
+        editspec at the location specified by <code>offset</code>.  The return value 
+        is 3-tuple <code>(filename, (start_sec, start_msec), (end_sec, end_msec))
+        </code>. 
+		</dd>
+</dl>
+
+<dl>
+              <dt><b><tt>__iter__()</tt></b></dt>
+              <dd>
+        Returns an iterator over all entries in EditSpec. Each iteration returns a 3-tuple of
+        <code>(filename, (start_sec, start_msec), (end_sec, end_msec))</code>
+              </dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>close()</tt></b></dt>
+		<dd>
+        Frees all resources of this object.  After this method is called, this 
+        object instance cannot be used again.  This objects __del__ method calls
+        <code>close()</code>.  So having the object go out of scope is usually 
+        good enough and an explicit call to close in not required.
+		</dd>
+</dl>
+
+<hr />
+
+<h2><a name="Edit">mpgedit.Edit</a></h2>
+
+<p />
+<dl>
+		<dt><b><tt>class Edit(spec, outfile, flags=0)</tt></b></dt>
+		<dd>
+        Constructor for the Edit class.  <code>spec</code> is an instance of Spec.
+        <code>outfile</code> is the name of an output mp3 file that will be generated.
+        <code>outfile</code> may contain a relative or absolute path.  <code>flags</code>
+        is optional and defaults to zero.  If flags is 0, a <code>outfile</code> 
+        will be	created and <code>outfile</code> must not exist.  If flags is 1, 
+        Edit will append to	<code>outfile</code>.  To close or free an Edit 
+        instance, either have the object instance go out of scope, explicitly 
+        decrement the reference count with the	<code>del</code> command, or call 
+        this object's <code>close()</code> method.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>edit(callback=None)</tt></b></dt>
+		<dd>
+        Edits an mp3 file. If a <code>callback</code> is specified, <code>edit</code> 
+        will call the function callback with the arguments <code>(frame, sec, offset)</code>. 
+        The callback function must return a boolean True value to tell <code>play</code>
+        to continue editing, otherwise, <code>edit</code> will stop. 
+        An MpgeditError will be raised on errors.				
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>frames()</tt></b></dt>
+		<dd>
+        Returns the frame number which is currently being edited.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>sec()</tt></b></dt>
+		<dd>
+        Returns the number of seconds which is currently being edited.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>offset()</tt></b></dt>
+		<dd>
+        Returns the current byte offset in the file being edited.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>sec()</tt></b></dt>
+		<dd>
+        Returns the frame number, number of seconds, and offset which is currently 
+        being edited.  The return value is a 3-tuple <code>(frame, sec, offset)</code>.
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>xing_header()</tt></b></dt>
+		<dd>
+        Returns a dictionary containing the xing header infomation.  Here is an 
+        example returned by this method:
+        <br />
+        <code>{'h_layer': 3, 'bytes': 596332, 'h_protect': 0, 'vbr_scale': 66, 
+        flags': 15, 'frames': 1264, 'h_id': 3, 'samprate': 44100}</code>				
+		</dd>
+</dl>
+
+<p />
+<dl>
+		<dt><b><tt>close()</tt></b></dt>
+		<dd>
+        Frees all resources of this object.  After this method is called, this 
+        object instance cannot be used again.  This objects __del__ method calls
+        <code>close()</code>.  So having the object go out of scope is usually 
+        good enough and an explicit call to close in not required.
+		</dd>
+</dl>
+
+<hr />
+
+<p />
+
+<h2><a name="MpgeditError">mpgedit.MpgeditError</a></h2>
+
+<dl>
+		<dt><b><big>exception</big> <tt>MpgeditError</tt></b>
+		<dd>
+        This exception is raised when there is a problem reading or appending to 
+        a file.	The associated value of the exception is a 2-tuple that contains 
+        the error number a message string.  Possible error values are:
+        <br />
+        <code>		
+            <ul>		
+                <li>(1, 'Unable to append to output file')</li>
+                <li>(2, 'Output file exists')</li>
+                <li>(3, 'Unable to read input file')</li>
+                <li>(4, 'Unable to read index file')</li>
+                <li>(5, 'Unable to open output file')</li>
+                <li>(6, 'Invalid Edit object'}</li>
+                <li>(7, 'Bad context'}</li>
+            </ul>
+        </code>				  
+		</dd>
+</dl>
+
+<hr/>
+
+
+<h2><a name="Sample_Minimal">Editing an mp3 file</a></h2>
+<code>
+<pre>
+>>> import pympgedit as mpgedit
+>>>
+>>> # Create a spec that a time slice of an mp3 file
+>>> spec = mpgedit.EditSpec()
+>>> spec.append('test1.mp3', 6, 12)
+>>>
+>>> # Create an index for the mp3 file which will contain frame and time data
+>>> mpgedit.Index('test1.mp3').index()
+>>>
+>>> # Create a new mp3 file based on the spec  
+>>> mpgedit.Edit(spec, 'new.mp3').edit()
+>>>
+>>> # Play the new mp3 file
+>>> mpgedit.Play('new.mp3').play()
+</pre>
+</code>
+
+
+<hr />
+
+<h2><a name="Sample_Play">Playing an mp3 file</a></h2>
+<code>
+<pre>
+#!/usr/bin/python
+import sys
+import time
+import pympgedit as mpgedit
+
+class DemoPlay(mpgedit.Play):
+    def __init__(self, mp3file):
+        mpgedit.Index(mp3file).index()
+        mpgedit.Play.__init__(self, mp3file)
+        self.count = 0
+        ttime = self.total_time()
+        print 'Total: size=%d time=%d.%03d' % (self.total_size(), ttime[0], ttime[1])
+        print 'Previous volume: left=%d right=%d' % self.get_volume()
+        self.set_volume(25, 25)
+        print 'New volume: left=%d right=%d' % self.get_volume()
+
+    def status(self, sec, msec):
+        self.count += 1
+        sys.stdout.write('Frame %5d: %02d.%03d sec\r' % (self.count, sec, msec))
+        sys.stdout.flush()
+        return 1
+
+    def play(self):
+        mpgedit.Play.play(self, self.status)
+        #
+        # playback happens in a new thread; sleep for playback to finish...
+        time.sleep(self.total_time()[0] + 1)
+
+    def stop(self):
+        print 'stopping playback...'
+        mpgedit.Play.stop(self)
+
+
+p = DemoPlay(sys.argv[1])
+try:
+    p.play()
+
+except KeyboardInterrupt:
+    print 'KeyboardInterrupt received, calling p.stop...'
+    p.stop()
+</pre>
+</code>
+
+<hr />
+
+<h2><a name="Sample_Edit">Editing an mp3 file</a></h2>
+<code>
+<pre>
+#!/usr/bin/python
+import sys
+import pympgedit as mpgedit
+
+def index_callback(frame, sec, msec, offset):
+    print 'frame=%4d  time=%2d:%02d  offset=%6d' % (frame, sec, msec, offset)
+    return True
+ 
+def edit_callback(frame, sec, offset):
+    print 'frame=%4d  sec=%2d  offset=%6d' % (frame, sec, offset)
+    return True
+
+def editif_test(mp3file):
+    # This test edits a file by scrambling it, then puts it back together
+    
+    # Create a spec that contains several time slices of the original file
+    spec = mpgedit.EditSpec()
+    spec.append(mp3file, '15.986-19.983')
+    spec.append(mp3file, '11.989-15.986')
+    spec.append(mp3file, '7.993-11.989')
+    spec.append(mp3file, '3.996-7.993')
+    spec.append(mp3file, '0.0-3.996')
+    spec.append(mp3file, '27.976-31.999')
+    spec.append(mp3file, '23.979-27.976')
+    spec.append(mp3file, '19.983-23.979')
+    spec.append(mp3file, '31.999-34.0')
+
+    # Create an index for the original mp3 file which will contain frame and time data
+    print '\nCreating index for %s...' % mp3file
+    mpgedit.Index(mp3file).index(index_callback)
+
+    
+    print '\nSpec entries' 
+    print 'length=%d' % spec.length()    
+    for s in spec:
+        print 'filename=%s, stime=%s, etime=%s' % s
+        
+    # Create a new mp3 file based on the spec above      
+    edit = mpgedit.Edit(spec, 'editif_test.mp3')
+    print '\nCreating editif_test.mp3...'
+    edit.edit()
+    
+    print 'info: frames=%d, sec=%d, offset=%d' % (edit.frames(), edit.sec(), edit.offset())
+    print 'xing header:', edit.xing_header()
+
+    # Create a new spec that will unscramble the scrambled mp3 file
+    spec = mpgedit.EditSpec()
+    tmpfile = 'editif_test.mp3'
+    spec.append(tmpfile, "15.986-19.983")
+    spec.append(tmpfile, "11.989-15.986")
+    spec.append(tmpfile, "7.993-11.989")
+    spec.append(tmpfile, "3.996-7.993")
+    spec.append(tmpfile, "0.0-3.996")
+    spec.append(tmpfile, "28.002-31.999")
+    spec.append(tmpfile, "24.006-28.002")
+    spec.append(tmpfile, "19.983-24.006")
+    spec.append(tmpfile, "31.999-")
+    
+    # Create an index for scrambled mp3 file
+    mpgedit.Index(tmpfile).index()    
+    print '\nCreating editif_test2.mp3...'
+    
+    # Create a new mp3 file which will be exactly the same as the original.
+    mpgedit.Edit(spec, 'editif_test2.mp3').edit(edit_callback)
+    
+                                                                          
+if __name__ == '__main__':
+    editif_test(sys.argv[1])       
+</pre>
+</code>
+
+</body>
+</html>

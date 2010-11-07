@@ -1,0 +1,101 @@
+#
+# Override default .c.obj rule with rule that places .obj in the
+# same directory as the specified source.
+#
+.c.obj:
+	$(CC) $(CFLAGS) /c $< /Fo$*.obj
+
+LD = link
+
+GTK_LIB   = /LIBPATH:C:\win32\tools\gtk\lib gdk_pixbuf-2.0.lib gdk-win32-2.0.lib gtk-win32-2.0.lib gobject-2.0.lib
+
+CFLAGS    = $(CFLAGS1) $(CINCLUDES) $(CDEBUGFLAGS)
+
+CFLAGS1   = /nologo /W3 /DNOANALYSIS /DSTDC_HEADERS /DWIN32                 \
+            /DGENERIC /DNOXFERMEM /I.. /Ic:\win32\tools\gtk\include\gtk-2.0 \
+            $(CFLAGS1) $(CDEBUGFLAGS)
+
+GTK_INC   = /IC:\win32\tools\gtk
+
+CINCLUDES = /I..                            \
+            $(GTK_INC)\include\gtk-2.0      \
+            $(GTK_INC)\lib\glib-2.0\include \
+            $(GTK_INC)\include\glib-2.0     \
+            $(GTK_INC)\include\pango-1.0    \
+            $(GTK_INC)\lib\gtk-2.0\include  \
+            $(GTK_INC)\include\atk-1.0
+
+CDEBUGFLAGS  = /Z7 /DEBUGTYPE:CV
+
+LDFLAGS      = /nologo /incremental:no
+LDFLAGS1     = /subsystem:windows 
+
+LDDEBUGFLAGS = /machine:i386 /debug /debugtype:cv /PDB:none
+
+RM           = del /f
+
+all: xmpgedit.exe spinner.exe mkgtkrc.exe installer
+
+MPG = ..
+
+O=.obj
+E=.exe
+
+
+XMPGEDIT_OBJS = player$O playctrl$O editor$O volume$O pcmview$O ../wav16$O ledtime$O ../getopt$O
+
+xmpgedit$E: $(XMPGEDIT_OBJS) ..\mpgedit.lib
+	$(LD) $(LDFLAGS) $(LDFLAGS1) $(LDDEBUGFLAGS) -OUT:xmpgedit$E \
+            $(XMPGEDIT_OBJS) $(GTK_LIB) ..\mpgedit.lib winmm.lib
+#
+spinner.exe: spinner$O
+	$(LD) $(LDFLAGS) $(LDFLAGS1) $(LDDEBUGFLAGS) -OUT:spinner.exe spinner$O $(GTK_LIB)
+
+mkgtkrc$E: mkgtkrc$O
+	$(LD) $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:mkgtkrc$E mkgtkrc$O
+
+#editor: editor.o
+#	gcc -Wall -g editor.o -o editor `pkg-config --libs gtk+-2.0`
+#
+#volume_main.o: volume.c
+#	gcc -D_MAIN $(CFLAGS) -c volume.c
+#	
+
+volume_main: volume.c
+	$(CC) -D_UNIT_TEST $(CFLAGS) /c volume.c /Fovolume_main.obj
+	copy volume_main.obj volume_main
+
+
+VOLUME_OBJS = volume_main$O playctrl.O
+
+volume$E: volume_main ..\mpgedit.lib
+	$(LD) $(LDFLAGS) -OUT:volume$E $(VOLUME_OBJS) ..\mpgedit.lib $(GTK_LIB) winmm.lib
+
+ledtime_main$O: ledtime.c
+	$(CC) -D_UNIT_TEST $(CFLAGS) /c ledtime.c /Foledtime_main$O
+
+ledtime$E: ledtime_main$O playctrl$O ..\mpgedit.lib
+	$(LD) $(LDFLAGS) -OUT:ledtime$E ledtime_main$O playctrl$O \
+            ..\mpgedit.lib $(GTK_LIB) winmm.lib
+
+pcmview$E: pcmview$O
+        $(LD) $(LDFLAGS) -OUT:pcmview$E pcmview$O ..\mpgedit.lib $(GTK_LIB)
+
+installer: output\setup.exe
+
+output\setup.exe: xmpgedit_installer.iss
+	iscc xmpgedit_installer.iss
+
+clean:
+	-$(RM) $(PLAY_OBJS) player$O editor$O spinner$O xmpgedit$E \
+              volume$O volume$E spinner$E editor$E volume_main$O
+	-$(RM) output\setup.exe
+
+credits.h: ../README
+	credits.pl > credits.h
+
+..\playif.obj: ..\playif.h
+player.obj: player.h editor.h  ../playif.h   ../editif.h  editor.h        \
+          volume.h pcmview.h ../segment.h  ../version.h ../pcmlevel.h   \
+          ../wav16.h         ../mpegindx.h ../portability.h playctrl.h credits.h
+editor.obj: editor.h ../editif.h

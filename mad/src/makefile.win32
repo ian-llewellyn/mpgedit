@@ -1,0 +1,60 @@
+#
+# MAD (MPEG Audio Decoder) Win32 nmake makefile
+# for mpgedit project,
+# Copyright (C) 2001-2006 by Adam Bernstein
+#
+# libmad - MPEG audio decoder library
+# Copyright (C) 2000-2004 Underbit Technologies, Inc.
+#
+CFLAGS = /nologo      /GX /O2 /I "." /I "../src" /D "NDEBUG" \
+         /D "FPM_INTEL" /D "WIN32" /D "_MBCS" /D "_LIB" \
+         /D "HAVE_CONFIG_H" /D "ASO_ZEROCHECK" /FD  /c
+
+MAD_OBJS = bit.obj      fixed.obj  huffman.obj  \
+           layer3.obj   stream.obj timer.obj    \
+           decoder.obj  frame.obj  layer12.obj  \
+           synth.obj  version.obj
+
+all: libmad.lib
+
+libmad.lib: $(MAD_OBJS)
+	lib /nologo /out:libmad.lib $(MAD_OBJS)
+
+bit.obj: ../src/bit.c
+	$(CC) $(CFLAGS) ../src/bit.c -o bit.obj 
+
+fixed.obj: ../src/fixed.c
+	$(CC) $(CFLAGS) ../src/fixed.c -o fixed.obj 
+
+huffman.obj: ../src/huffman.c
+	$(CC) $(CFLAGS) ../src/huffman.c -o huffman.obj 
+
+layer3.obj: ../src/layer3.c
+	$(CC) $(CFLAGS) ../src/layer3.c -o layer3.obj 
+
+stream.obj: ../src/stream.c
+	$(CC) $(CFLAGS) ../src/stream.c -o stream.obj 
+
+timer.obj: ../src/timer.c
+	$(CC) $(CFLAGS) ../src/timer.c -o timer.obj 
+
+decoder.obj: ../src/decoder.c
+	$(CC) $(CFLAGS) ../src/decoder.c -o decoder.obj 
+
+frame.obj: ../src/frame.c
+	$(CC) $(CFLAGS) ../src/frame.c -o frame.obj 
+
+layer12.obj: ../src/layer12.c
+	$(CC) $(CFLAGS) ../src/layer12.c -o layer12.obj 
+
+minimad.obj: ../src/minimad.c
+	$(CC) $(CFLAGS) ../src/minimad.c -o minimad.obj 
+
+synth.obj: ../src/synth.c
+	$(CC) $(CFLAGS) ../src/synth.c -o synth.obj 
+
+version.obj: ../src/version.c
+	$(CC) $(CFLAGS) ../src/version.c -o version.obj 
+
+clean:
+	del libmad.lib $(MAD_OBJS) vc60.idb

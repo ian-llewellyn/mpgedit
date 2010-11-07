@@ -1,0 +1,110 @@
+CC = xlc
+CFLAGS = -Dlint  -DSTDC_HEADERS -D__DECALPHA__ -D_ALL_SOURCE $(CDEBUGFLAGS) $(CFLAGS1)
+
+#CDEBUGFLAGS = -g 
+#CDEBUGFLAGS = -O3 
+CFLAGS1     = -Iinclude -Ilibmp3lame -Impglib
+
+MPEGDECODER = -Lmpglib -lmpglib_mpgedit
+
+all: subdirs mkbuildnum _mkbuildnum mpgedit mpgedit_nocurses mp3_time \
+     tstheader mp3_vbrpatch \
+     mpeg_indx libdecoder_popen.so libdecoder_mpg123.so install_shlibs
+
+install:
+	install.sh
+
+uninstall:
+	install.sh -u
+
+mp3_header_objs = header.o mp3_header.o mp3time.o xing_header.o \
+                  mpegfio.o mpegindx.o decoder.o plugin_unix.o
+
+mp3_time_objs   = mp3_time.o mp3time.o header.o mpegfio.o xing_header.o
+
+vbr_objs        = vbr_patch.o xing_header.o mpegfio.o header.o
+
+mpeg_indx_objs  = mpeg_indx.o mpegindx.o mpegfio.o header.o \
+                  mp3time.o xing_header.o
+
+curses_obj      = mpegcurses.o
+nocurses_obj    = cursesstub.o
+
+subdirs:
+	(cd mpglib; make -f makefile.aix)
+
+mkbuildnum: mkbuildnum.o
+	$(CC) -o $@ mkbuildnum.o
+
+_mkbuildnum:
+	mkbuildnum AIX > mpgedit_buildnum.h
+
+mpgedit: $(mp3_header_objs) $(curses_obj)
+	$(CC) -o $@ $(mp3_header_objs) $(curses_obj) -lcurses -ldl $(EFENCE)
+
+dlopen: dlopen.o
+	$(CC) -o $@ dlopen.o -ldl 
+
+mpgedit_nocurses: $(mp3_header_objs)   $(nocurses_obj)
+	$(CC) -o $@ $(mp3_header_objs) $(nocurses_obj) -ldl
+
+tstheader: tstheader.o header.o
+	$(CC) -o $@ tstheader.o header.o
+
+mp3_time: $(mp3_time_objs)
+	$(CC) -o $@ $(mp3_time_objs)
+
+mp3_vbrpatch: $(vbr_objs)
+	$(CC) -o $@ $(vbr_objs)
+
+mpeg_indx: $(mpeg_indx_objs)
+	$(CC) -o $@ $(mpeg_indx_objs)
+
+curs: curs.o
+	$(CC) -o $@ curs.o -lcurses
+
+libdecoder_popen.so: decoder.o
+	$(CC) -berok -bnoentry -bM:SRC -brtl -o libdecoder_popen.so decoder.o -bE:decoder_mpglib.def
+
+libdecoder_mpg123.so: decoder_mpg123.o audio.o
+	$(CC) -berok -bnoentry -bM:SRC -brtl -o libdecoder_mpg123.so decoder_mpg123.o audio.o $(MPEGDECODER) -bE:decoder_mpglib.def
+
+install_shlibs:
+	[ -f libmpglib_mpgedit.so ] || rm -f libmpglib_mpgedit.so
+	[ -f libmpglib_mpgedit.so ] || ln -s mpglib/libmpglib_mpgedit.so libmpglib_mpgedit.so
+	[ -f libmpgedit_decoder.so ] || rm -f libmpgedit_decoder.so
+	[ -f libmpgedit_decoder.so ] || ln -s libdecoder_mpg123.so libmpgedit_decoder.so
+	chmod +x mp3decoder.sh
+
+
+subdirs_clean:
+	(cd mpglib; make -f makefile.aix clean)
+
+
+audio.o:          audio_aix.c
+decoder.o:        decoder.h
+decoder_mpg123.o: mpglib/interface.h decoder.h
+header.o:         portability.h header.h
+mp3_header.o:     portability.h header.h mp3time.h mpegindx.h xing_header.h \
+                  mpegfio.h mp3_header.h mpegcurses.h decoder.h plugin.h \
+		  mpgedit_buildnum.h _mkbuildnum
+mp3_time.o:       mp3time.h header.h mp3time.h header.h mpegfio.h
+mpeg_indx.o:      mpegindx.h
+mpegcurses.o:     portability.h mp3time.h mp3_header.h mpegcurses.h
+mpegfio.o:        mpegfio.h header.h
+mpegindx.o:       portability.h mpegfio.h header.h mp3time.h mp3_header.h \
+                  xing_header.h
+plugin_unix.o:    portability.h decoder.h
+tstheader.o:      header.h
+vbr_patch.o:      xing_header.h mpegfio.h header.h
+xing_header.o:    xing_header.h
+
+clean: subdirs_clean
+	rm -f mp3_time mpeg_indx tstheader mp3_vbrpatch $(mp3_header_objs) \
+        mp3_time.o  mpeg_indx.o  tstheader.o  vbr_patch.o $(curses_obj)    \
+        $(nocurses_obj) mpgedit mpgedit_nocurses libdecoder_popen.so \
+        libdecoder_mpg123.so decoder.o decoder_mpg123.o \
+        curs.o curs libmpgedit_decoder.so libmpglib_mpgedit.so audio.o \
+        mpgedit_buildnum.h mkbuildnum mkbuildnum.o
+
+cursesstub.c:mp3time.h mp3_header.h mpegcurses.h

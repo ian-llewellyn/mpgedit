@@ -1,0 +1,884 @@
+.\" $Id: mpgedit.1,v 1.12.2.1 2007/10/02 16:03:50 number6 Exp $
+."
+.TH mpgedit 1 \" -*- nroff -*-
+.SH NAME
+mpgedit \- MPEG 1/2/2.5 audio (mp3) file editor
+
+.SH SYNOPSIS
+.TP 9
+mpgedit \fB-h\fR | \fB-H\fR | \fB-V\fR | [ \fB-c\fR [\fBinputfile1\fR [\fBinputfile2\fR...]]]
+.PP
+mpgedit [\fB-s\fR] \fB[\fB-v\fR[\fBv\fR[\fBv\fR[\fBv\fR[\fBv\fR]]]]] [\fB-p\fR] [\fB-d N\fR] [\fB-e\fR [\fBstart\fR[\fB-\fR[\fBend\fR]]]] [\fB-E\fR] [\fB-I\fR] [\fB-X\fR[\fB0\fR|\fB1\fR|\fB2\fR]] [\fB-L\fR] [\fB-l volume\fR] [\fB-f\fR] \fBinput_file\fR [\fB-o\fR [\fB+\fR]\fBoutfile_name\fR ]
+mpgedit [\fB-D\fR] [\fB-DbN\fR] [\fB-DcN\fR] [\fB-DmN\fR] [\fB-Ds\fR] [\fB-d N\fR] input_file [\fBinput_file2 ...\fR]
+
+.SH DESCRIPTION
+mpgedit is an MPEG 1 layer 1/2/3, MPEG 2, and MPEG 2.5 audio (mp3)
+file editor that is capable
+of processing both Constant Bit Rate (CBR) and Variable Bit Rate (VBR) encoded
+files.  mpgedit can cut an input MPEG file into one or more output files, as
+well as join one or more input MPEG files into a single output file.  When
+editing VBR files that have a XING header, mpgedit updates the output
+file's XING header information to reflect the new file size and
+average bit rate.
+.PP
+When editing a file, mpgedit locates the nearest MPEG frame boundary for the
+desired start and end times, then copies the frames between these times 
+to the output file.  Since no file decoding / encoding occurs during editing,
+there is no audio quality loss when editing with mpgedit. 
+For each file being edited, a time index file is
+created that stores the file position, in bytes, for every 1 second of
+play time.  Indexing guarantees correct and fast random access to 
+edit time offsets for VBR-encoded files.  
+.PP
+mpgedit file playback allows
+edit-time audio playback auditioning, which insures that desired cut occurs
+at the correct time
+offset. This feature is necessary when making edits that demand sub-second
+accuracy (especially with VBR files).  Since most MP3 players display 
+playback run times based on a VBR file's average encoded bit rate, 
+edits based on these players' displayed times can miss the desired 
+start or stop time by many seconds.  
+.PP
+It is not necessary to use
+the playback functionality to make edits when the edit start and stop
+times are already known.  The playback feature is merely an aid for
+accurately locating the desired edit start and stop times.
+.PP
+mpgedit operates in two modes: a command line and a curses-based, full-screen 
+interactive shell.  All editing functionality is available in both modes.
+The chief advantage of the interactive mode comes when using the playback 
+feature for selection and verification of edit begin and end times, 
+which is more rapidly performed interactively.
+.SH COMMAND LINE OPTIONS
+Command line mode has the following options available:
+.TP 4
+\fB-c\fR [\fBinput file\fR] [\fBinput file 2\fR] \.\.\. [\fBinput file N\fR]
+Curses edit mode.  Enter a full-screen, interactive editing session to 
+play back input files and set begin and end times for each edit.  This 
+mode is the default action when no arguments are supplied.
+.TP 4
+\fB-d N\fR
+Specifies playback or decoding decimation level.  When used with
+playback, every Nth frame is played. When used with \fB-D\fR, the default
+decimation level of 9 is replaced with the value specified.  There is
+a serious performance penalty for using a smaller decimation level
+when decoding (\fB-D\fR option), and rarely is the increased silence 
+detection resolution required.
+.TP 4
+\fB-D\fR
+Decode input files and computes average volume for every decoded
+frame.  The amplitude values are stored in a file named \fBinput.lvl\fR.
+Once decoded, segment boundaries separated by a minimum amplitude
+threshold are detected, storing the result of that analysis in the
+file \fBlevels_session\fR. The default decimation level used by this
+operation is \fB9\fR, or about 3 frames per second. This default is changed
+with the \fB-d\fR option.
+.TP 4
+\fB-DbN\fR
+Same as \fB-D\fR, but override the \fBSILENCE_THRESHOLD\fR parameter. The default
+value is \fB30\fR, setting the silence threshold to -30db below the average
+input file amplitude.  Lower values detect segment boundaries
+containing louder content.  Valid values are \fB6\fR-\fB96\fR.
+.TP 4
+\fB-DcN\fR
+Same as \fB-D\fR, but override the \fBSILENCE_REPEAT\fR parameter, the number
+consecutive decoded samples below the silence threshold that must
+occur before a segment boundary is detected.  The default value is \fB3\fR,
+or about one second of silence when the default decimation level (\fB-d\fR
+option) of \fB9\fR is used.
+.TP 4
+\fB-DmN\fR
+Same as \fB-D\fR, but override the \fBMINIMUM_TIME\fR parameter, the number of
+seconds that must elapse once a segment boundary has been detected
+before another boundary can be detected.  The default value is \fB90\fR
+seconds.
+.TP 4
+\fB-Ds\fR
+Decode the input file, writing the output to standard output.
+.TP 4
+\fB-e start\fR[\fB-\fR[\fBend\fR]] 
+Perform copy/paste operation on input files. The input MP3
+file may be encoded as either CBR or VBR.  For quick and accurate
+random access to VBR-encoded files, an external time index file
+is created.  The index file uses the basename of the input file
+with the '.idx' extension.
+      
+The output files created by this option are located in the same
+directory as the input MPEG file. When the input directory is
+read-only, the output is written to the current working directory. 
+When the -o option is not used, the copy/paste data is
+written to a file with the same basename as the input file with
+the '_nn.mp3' extension, where nn is an integer value. When a
+file named basename_nn.mp3 already exists, the integer nn is
+incremented until the filename is unique. The input MPEG file is
+never overwritten by this option. 
+      
+When only a start time is specified, the copy/paste operation is
+performed from that start time through the end of file. When just
+an end time is specified, the copy/paste operation is performed
+from the beginning of the file through the specified end time.
+When both start and end times are specified, the portion of the
+file bracketed by these times is copy/pasted.  Start and end times
+are specified in seconds, or MM:SS.mmm, where MM is minutes, SS
+is seconds, and mmm are milliseconds.  Although any millisecond
+value may be specified, it will always be rounded off to the next
+frame boundary, approximately 26ms.
+      
+Multiple -e options are allowed. Each -e represents a separate edit
+that will be performed on the named input file.  When multiple -f options
+are present, the -e options immediately preceding each -f option apply to 
+that input file.
+
+.TP 4
+\fB-E\fR
+Suppress performing edit when -e option is used.  Useful
+when both -e and -v options are used to generate verbose output for a
+portion of an input file, while performing the edit is not desired.
+
+.TP 4
+\fB-I\fR
+Suppress indexing operation prior to performing specified edit. 
+Depending on the situation, this feature may perform the desired
+edit in less time in conjunction with indexing.  One example is
+cutting a portion of a file being captured in real time while it is
+being encoded.  In this situation, the growing size of the input
+MP3 file will confuse the index generator.  \fBWarning:\fR Seek performance
+of the \fB-I\fR option is much slower than using an index file,
+as all frames between the start of the file to the seek time are
+read.
+
+.TP 4
+\fB-f\fR input file name
+Use the named input file.
+Multiple -f options are allowed.  At least one -e option must be
+precede each -f option.
+
+If multiple input files are specified, all -e options in a group apply
+to the -f immediately following a group of -e options.  For example:
+.PP
+.RS 8
+\fBmpgedit -e 2-12 -f foo1 -e 20-30 -f foo2\fR
+.RE
+.PP
+.RS 4
+\fB-e 2-12\fR applies to foo1, \fB-e 20-30\fR applies to foo2.
+.RE
+
+.TP 4
+\fB-o\fR output file
+Use the named output file. Prefixing a + to filename causes output from 
+an edit to be appended
+to the output file.  XING headers are automatically updated when
+using this option.
+.TP 4
+\fB-h\fR
+Display command line usage summary.
+.TP 4
+\fB-H\fR
+Display long help information.  Detailed usage descriptions for each command line option are displayed.
+.TP 4
+\fB-l\fR left[:right]
+Set the current playback device volume level to a value between 0 and 100.
+Specifying only a \fBleft\fR value sets both \fBleft\fR and \fBright\fR
+channels to that value.
+.TP 4
+\fB-L\fR
+Display the current playback device volume level.
+.TP 4
+\fB-p\fR
+Play MPEG file using external player.
+.TP 4
+\fB-s\fR
+Silent operation.
+All of the normal informational messages are suppressed during
+indexing and editing.
+.TP 4
+\fB-v\fR
+Verbose output. Adding another \fBv\fR increases verbosity.
+Up to \fB-vvvvv\fR are allowed. \fB-v\fR displays the frame count and file
+offset at one second increments. \fB-vv\fR adds the following information
+for each frame: time offset, bitrate, frame size, frame count,
+frame position.  \fB-vvv\fR adds to \fB-vv\fR and displays a detailed 
+breakdown of each MPEG frame header. \fB-vvvv\fR adds an MD5 checksum 
+to the \fB-vv\fR output. \fB-vvvvv\fR adds an MD5 checksum to the 
+\fB-vvv\fR output.
+.TP 4
+\fB-V\fR
+Display mpgedit version.
+.TP 4
+\fB-X\fR[\fB0\fR|\fB1\fR|\fB2\fR]
+Manipulate XING header. \fB-X0\fR omits the XING header prefix, allowing output
+to be appended to the end of a previous edit. \fB-X1\fR fixes the XING header
+after catenating edits. These two options are largely obsolete because 
+mpgedit now properly updates the XING header when editing and concatenating
+VBR files.
+\fB-X2\fR adds a XING header to a file missing this header,
+then updates the XING statistics.
+
+The \fB-X1\fR modifies the input file's XING header in place.  This is the
+one exceptional case when mpgedit modifies the input file.
+
+The \fB-X2\fR option generates a new file, containing the XING header prefix,
+followed by the contents of the input file. The output file is defaulted
+when the \fB-o outfile\fR option is not used.  The default output file name
+is the same basename as the input file name, with the '_newxing_\fBnn\fR.mp3' 
+extension, where \fBnn\fR is a unique integer extension.
+
+This example illustrates the addition of a XING header to a file without this
+header:
+
+.RS 8
+\fBmpgedit -X2 myfile.mp3\fR
+.RS -4
+
+This command generates the new file \fBmyfile_newxing_1.mp3\fR, 
+containing a XING header prefix, followed by the contents of the
+input file \fBmyfile.mp3\fR
+
+Note: Releases of \fBmpgedit\fR prior to 0.6p1 did not always
+properly update the Xing header after performing an edit.  Using \fBmpgedit\fR
+0.6p1, or later, these incorrect headers can be fixed with the
+following command:
+
+.RS 4
+\fBmpgedit -X1 file_to_fix.mp3\fR
+.RS -4
+
+Note: The addition of a XING header to a CBR file is possible with the
+\fB-X2\fR option.  Although harmless, the addition of a XING header to
+such a file is unnecessary, and redundant.  However, when joining a
+CBR file followed a VBR file, the addition of a XING header becomes
+necessary in order for some MP3 players to properly display the 
+elapsed run time.
+
+
+.SH INTERACTIVE MODE COMMANDS
+.PP
+Interactive mode uses single key commands to control editing functionality.
+Command key binding are similar to vi edit commands.  Interactive mode 
+has the following edit commands available:
+
+.SS CURSOR MOVEMENT
+.TP 6
+\fBArrow_Down\fR
+Same as j.
+.TP 6
+\fBArrow_Left\fR
+Same as h.
+.TP 6
+\fBArrow_Right\fR
+Same as l.
+.TP 6
+\fBArrow_Up\fR
+Same as k.
+.TP 6
+\fBk\fR, \fBArrow_Up \fR
+Move the cursor up one line.
+.TP 6
+\fBj\fR, \fBArrow_Down \fR
+Move the cursor down one line.
+.TP 6
+\fBl\fR, \fBspace\fR, \fBArrow_Right\fR 
+Move the cursor right one field on the current line.
+.TP 6
+\fBh\fR, \fBArrow_Left\fR
+Move the cursor left one field on the current line.
+.TP 6 
+\fBTAB\fR
+Toggle between start and end time fields.
+.TP 6
+\fBH\fR
+Move the cursor home to the first line in the editor.
+.TP 6
+\fBG\fR
+Move the cursor to the last line in the editor.
+
+.SS EDITING COMMANDS
+.TP 6
+\fBESC\fR
+Undo any changes to the current line.  All changes can be undone
+until the cursor is moved to another line.
+.TP 6
+\fB ,\fR
+Decrease selected time field by one count.  
+.TP 6
+\fB .\fR
+Increase selected time field by one count.  
+.RS 6 
+.PP
+For each of the start and end 
+time input fields, the minute, second, and millisecond values can be modified.
+The desired numeric value can be directly input from the keyboard,
+or the current value can be modified by incrementing or decrementing
+the current value
+up with the \fB.\fR command and down with the\fB ,\fR command.
+.RE
+.TP 6
+\fBA\fR
+Enter autoedit mode.  A configuration menu is first presented,
+which allows setting
+the input file name, and silence detection parameters,
+After making any modifications to the configuration menu,
+the input file is analyzed and silent periods are automatically
+detected.  The main edit window is populated with the start/stop
+times for each segment separated by a silent period.  See the
+\fBAUTOMATIC EDITING\fR section for additional details about this feature.
+
+Multiple input file names may be entered, separated by spaces or commas.
+When a comma separator is used, spaces loose their separator meaning.
+Use a comma separator makes entering multiple file names where 
+spaces are part of the file name more convenient.  Preceding a space
+character or a comma with a backslash (\fB\\\fR) quotes that character,
+and it is no longer interpreted as a separator.  The file named
+\fBmusic,1.mp3\fR must be entered as \fBmusic\\,1.mp3\fR, for example.
+The file \fBStyx - Mr. Roboto.mp3\fR must be entered as
+\fBStyx\\ -\\ Mr.\\ Roboto.mp3\fR when the comma separator is not used,
+as each space would be interpreted as a separator.
+.TP 6
+\fBC\fR
+Clear editor.  All currently specified edits are cleared.  The user is
+warned that unsaved changes will be lost before clearing the editor.
+.TP 6
+\fBc\fR
+Clear currently selected start or end time.  All three time components
+(minutes, seconds and milliseconds) are reset to zero when the \fBc\fR command 
+is entered. Only the currently selected start or end field is
+cleared with the \fBc\fR command.
+.TP 6
+\fBP\fR
+Paste the previously deleted line above the cursor position.
+.TP 6
+\fBp\fR
+Paste the previously deleted line below the cursor position.
+.TP 6
+\fBO\fR
+Insert a new line above the cursor position.
+.TP 6
+\fBo\fR
+Insert a new line below the cursor position.
+.TP 6
+\fBD\fR
+Delete the line at the cursor position.
+.TP 6
+\fBJ\fR
+Join the edit time of the line below the cursor with the current line.
+The end time of the current line is changed
+to be the end time of the following line, then the
+following line is deleted.  Before this change is made, the current line
+and the following line are yanked into the undo buffer.
+.TP 6
+\fBn\fR
+Specify the output file to save all specified edits to.  This name
+must be specified before the \fBe\fR (perform edit) command will function.
+.TP 6
+\fBf\fR
+Edit the input filename field.  Entering a
+\fB^U\fR (\fBctrl-U\fR) key deletes all characters in the field.  Entering a
+\fBBackspace\fR key deletes only the previous character.  \fBArrow_Left\fR and
+\fBArrow_Right\fR positions the cursor within the name field.  Characters are
+added in insert mode, and will not over write following characters. \fBESC\fR will 
+undo changes and exit the field.
+\fBEnter\fR will accept the current value as the input filename.
+The named input file will be indexed when the \fBEnter\fR key is pressed,
+if the index file does not already exist.
+.TP 6
+\fBs\fR
+Play the input file at the time specified in the currently selected 
+start or end time field.  Playback will continue
+until any key is pressed.  Playback will pause when the \fBEnter\fR
+key is pressed, and will resume with another \fBEnter\fR key press. During
+playback, the current time offset is displayed at the bottom of the screen.
+.PP
+.RS 6
+The chief advantage of the \fBs\fR command is the ability to
+rapidly select a start or end time, begin and end playback,
+modify the time, and play back again. By repeating these steps,
+the precise time can be located.
+.RE
+.TP 6
+\fBS\fR
+Play the input file up to the time specified in the currently selected
+start or end time field.  Playback will begin at 5 seconds before the
+selected time, and will stop at the selected time.
+.PP
+.RS 6
+This feature is useful when searching for a break between two music
+selections, where the previous piece ends loudly and the next
+piece begins softly.  Playing back a few seconds before the edit end time 
+enables precisely locating breaks between pieces of music.
+.RE
+.TP 6
+\fBL\fR
+Load edit files and times from a previous mpgedit session.  All edit
+file names and times are saved when exiting an interactive session with
+the \fBe\fR, \fBE\fR and \fBq\fR commands.  The \fBL\fR command loads 
+these saved edit specifications
+for subsequent modification.
+.TP 6
+\fBQ\fR
+Quit all edits and discard changes.  All work performed during the
+current interactive session is discarded with this command, so use it 
+with caution.
+.TP 6
+\fBq\fR
+Quit an interactive edit session and save the current edit files and times.
+This saved information can be loaded with the \fBL\fR command to resume
+the edit session at a later time.
+None of the MPEG file edits occur when using this command.  mpgedit
+prompts for the name of the file to save the edit specifications to.
+When this file already exists, mpgedit prompts for whether
+to over write the file.
+To save to a different file answer no, then \fBq\fR again and modify the 
+save filename.
+.TP 6
+\fBe\fR
+Perform MPEG file edits using current input file and time specifications.
+The edits are saved to the output filename specified by the last \fBn\fR
+command.  An output name must be specified with \fBn\fR before \fBe\fR
+will perform any edits.  All input file names and edit times are saved, 
+as with the \fBq\fR command, before the MPEG file edits are performed.
+.TP 6
+\fBE\fR
+Perform MPEG file edits using current input file and time specifications.
+The edits are saved to default output filenames.  The default 
+output filenames are
+the same basename as the input file, with the '_nn.mp3' extension
+appended, where nn is a unique integer value.
+All input file names and edit times are saved, 
+as with the \fBq\fR command, before the MPEG file edits are performed.
+.TP 6
+\fBv, V\fR
+Adjust the current playback device volume level. \fBv\fR reduces the
+volume level by two settings; 
+\fBV\fR increases the volume level by two settings.  The allowed 
+volume range is between 0 and 100.
+.SH AUTOMATIC EDITING
+.PP
+\fBmpgedit\fR can edit a file automatically by searching for periods of
+silence in an input file.  Each silent period found represents
+an edit that will be performed on the input file.  The results of this
+editing analysis are stored in a saved session file named
+\fBlevels_session\fR.  This session file can be loaded for review in an
+\fBmpgedit\fR interactive curses session (see the \fBL\fR interactive mode
+command) or by \fBxmpgedit\fR (see the \fBLoad Session...\fR section
+described in \fBxmpgedit\fR(1)).   Specifying both the \fB-D\fR and \fB-c\fR 
+command line options will load the automatic edits into an mpgedit 
+interactive curses session.  Automatic edit mode can be entered in an
+interactive curses session with the \fBA\fR command.
+
+\fBmpgedit\fR automatic editing requires each input file be decoded
+into its \fBPCM\fR or \fB.wav\fR representation.  This decoding is done only
+for the
+purposes of silence detection.  Once the edit times for each silence boundary
+have been detected, all edits are performed on the original input files without 
+decoding or re-encoding.  The results of the input file decoding are stored
+in a corresponding \fBinput.lvl\fR file.  The \fB.lvl\fR file stores the
+average volume level for representative frames from the input file. 
+By default, every \fB9th\fR frame from the input file is decoded, corresponding
+to approximately 3 volume samples per second.  This default may be changed
+by the \fB-d N\fR option.  This skipping of frames is done for performance
+reasons, since decoding MP3 data to its PCM representation is a
+computationally expensive operation.  For most applications, \fB3\fR
+audio samples per second is sufficient to accurately detect silence boundaries.
+
+This is simplest automatic editing example:
+
+.RS 4
+\fBmpgedit -D input.mp3\fR
+.RE
+
+These operations are performed by this command:
+.TP 4
+1.
+Create the index file \fBinput.idx\fR when it does not already exist.
+
+.TP 4
+2.
+Create the decoded audio levels file \fBinput.lvl\fR.
+
+.TP 4
+3.
+Search for periods of silent present in \fBinput.lvl\fR, then store
+corresponding edits in the \fBlevels_session\fR file.
+.PP
+After this analysis is complete, load the \fBlevels_session\fR file
+into \fBmpgedit\fR for review and further refinement of the edit start and
+stop times.
+
+Sometimes it is necessary to override one or more of the parameters controlling
+silence detection.  The \fBmpgedit\fR default values generally work
+for all content, but sometimes it is necessary to tweak these parameters
+to obtain the desired results.
+
+.RS 4
+\fBmpgedit -Dm30 -Db20 input.mp3\fR
+.RE
+
+This example reduces to 30 seconds the amount of time that must pass 
+before a subsequent segment boundary can be detected.  The silence threshold
+has also been reduced to -20db, allowing louder sections to be detected
+as a segment boundary.
+
+.TP 7
+Note:
+A space character must not appear between any character in the
+\fB-DbN\fR, \fB-DcN\fR, or \fB-DmN\fR, options.
+.PP
+.TP 7
+Note:
+Creation of the \fBinput.lvl\fR file may take a very long time, possibly
+several minutes depending on the length of the input file and the
+CPU speed of the computer running mpgedit.
+Once the \fBinput.lvl\fR file has been created, subsequent silence
+detection passes will run much faster, usually less than a second, depending
+on the length of the input file.
+.PP
+These parameters control the silence detection analysis, modifying
+the sensitivity of the detection.
+
+.RS 4
+.TP 4
+SILENCE_THRESHOLD (\fB-DbN\fR) Default value: \fB30\fR
+This parameter specifies how many decibels below the average audio level of
+entire input file an audio sample must fall before it is considered "silent".
+The larger the value of this 
+parameter, the quieter an audio sample must be to qualify as an edit boundary.
+The valid range of this parameter is between \fB6\fR and \fB96\fR.
+.TP 4
+SILENCE_REPEAT (\fB-DcN\fR) Default value: \fB3\fR
+Controls the number of consecutive audio samples quieter than the 
+\fBSILENCE_THRESHOLD\fR that must occur
+before an edit boundary is detected.  The default value is \fB3\fR, which
+corresponds to about 1 second of silence when the default decoding
+decimation (see the \fB-d N\fR option) of \fB9\fR is used.  Larger 
+\fBSILENCE_REPEAT\fR values reduce the risk of false positive segment boundary
+detection.  However, too large a value for \fBSILENCE_REPEAT\fR
+also increases the risk a segment boundary will not be properly detected.
+.TP 4
+MINIMUM_TIME (\fB-DmN\fR) Default value: \fB90\fR
+This parameter specifies how many seconds must elapse since the last
+segment boundary has been detected before another segment boundary can be
+detected.  This parameter is
+useful for reducing the occurrence of segment boundary false positive detection.
+Choosing the proper value for this parameter is content dependent.  For
+example, some music contains frequent periods of silence.  Sections
+of silence that occur before the \fBMINIMUM_TIME\fR has expired will be
+contained within an edit segment, instead of defining a new edit boundary.
+However, there will always be cases where 
+it is impossible to determine if a period of silence should divide two
+segments, or should be contained within a segment.
+.RE
+
+
+
+.SH EXAMPLES
+.TP 6
+\fBmpgedit -Dm30 -Db36 -c radiomusic.mp3\fR
+Automatically edit the input file \fBradiomusic.mp3\fR. Using \fB-c\fR loads
+the results of the silence detection analysis into an mpgedit
+interactive curses session, where the segment start/stop times may be
+reviewed for correctness in the interactive session before performing the
+edits on the input file.
+The MINIMUM_TIME (\fB-Dm30\fR) parameter is set to 30 seconds, 
+and the SILENCE_THRESHOLD (\fB-Db36\fR) parameter is lowered to 36
+decibels in this example.
+
+.TP 6
+\fBmpgedit -e-6.500 -e6.500-12.500 -e12.500-19 -e19- test1.mp3\fR
+
+Cut the file \fBtest1.mp3\fR into 4 pieces.  The first cut starts at
+the beginning of test1.mp3, and ends at 6 1/2 seconds;  cut 2 begins at
+6 1/2 seconds, and ends at 12 1/2 seconds; cut 3 begins at 12 1/2 seconds
+and ends at 19 seconds; cut 4 begins at 19 seconds and includes the
+remainder of test1.mp3.
+
+.TP 6
+\fBmpgedit -o output.mp3 -e- test1_1.mp3 test1_2.mp3 test1_3.mp3 test1_4.mp3\fR
+
+Join four MP3 files together into a single output file.  The edit time
+specification \fB-e-\fR means start from the beginning of the file 
+and run through to the end of the file.  In this example, only one edit
+time specification is needed, and is applied to all input file names
+that follow.  Note the \fB-f\fR option can be omitted when the remainder
+of the command line is input file names.
+
+.TP 6
+\fBmpgedit -e19- -f output.mp3 -e-6.500 -f test1.mp3\fR
+
+This example joins cuts from two different files. The first cut
+is from output.mp3, start at 19 seconds and ending at the end of
+file. The second is from from test1.mp3, starting at the
+beginning of the file and ending at 6 1/2 seconds. The default
+output filename is used (output_1.mp3). The cuts from both input
+files are stored in output_1.mp3 because the first cut ends at
+the end of file and the second cut starts at the beginning of
+file. 
+
+.TP 6
+\fBmpgedit -e-6.500 -e12.500-19 -f test1.mp3 -e2.500-6 -f test2.mp3\fR
+
+Create 3 cuts, two from test1.mp3, one from test2.mp3. In this
+case, the default output file names are created, resulting in the
+three cuts stored in test1_1.mp3, test1_2.mp3, and test2_1.mp3,
+respectively. 
+
+.TP 6
+\fBmpgedit -o edits.mp3 -e-6.500 -e12.500-19 -f test1.mp3 -e2.500-6 -f test2.mp3\fR
+
+Performs the same edits as the previous example, but saves the edit results in 
+one output file, named \fBedits.mp3\fR.
+
+.TP 6
+\fBmpgedit -e19- -p test1.mp3\fR
+
+Begin sound playback from the file \fBsong1.mp3\fR beginning
+19 seconds into the file.
+
+.TP 6
+\fBmpgedit -vvv elgar.mp3\fR
+
+Parse MPEG audio file frames, and display frame information.  This example
+demonstrates the output displayed when \fB-vvv\fR is used.  For the purposes
+of this discussion, lines tagged with (1), (2) and (3) correspond to -v, -vv
+and -vvv respectively; the (1), (2) and (3) do not appear in the actual output.
+
+.RS -4
+.nf
+
+Found xing header
+h_id      = 1
+h_layer   = 3
+h_protect = 0
+samprate  = 44100
+flags     = 15
+frames    = 18146
+bytes     = 9238103
+vbr_scale = 44
+
+             \.\.\.
+
+
+(1)   *** t=1s fr=39 pos=22232 (0x56d8)
+(2) MPEG header t=1.044s  br=192  sz=626  fr=40     pos=22232      pos=0x56d8
+(3) File position:  0      (0x0)
+(3) Frame size:     626    (0x272)
+(3) MPEG version:   3      (MPEG Version 1)
+(3) MPEG layer:     1      (Layer III)
+(3) Protection:     0      (no)
+(3) bitrate:        11     (192)
+(3) sample_rate:    0      (44100)
+(3) Pad:            0      (no)
+(3) Private:        0      (no)
+(3) channel_mode:   1      (Joint stereo)
+(3) joint_ext_mode: 0      (Intensity stereo off; Mid-side stereo off)
+(3) Copyright:      0      (no)
+(3) Original:       1      (yes)
+(3) Emphasis:       0      (None)
+
+
+             \.\.\.
+
+File name:    elgar.mp3
+VBR Min:      80
+VBR Max:      192
+VBR Average:  150
+Total frames: 15584
+File size:    7623958
+Track length: 6:47.85 (407s)
+
+Variable Bit Rate frame statistics
+Bit Rate      Frame Count
+-------------------------
+ 80 kbps:          1 (<1%)
+ 96 kbps:         27 (<1%)
+112 kbps:        733 (4%)
+128 kbps:       4169 (26%)
+160 kbps:      10196 (65%)
+192 kbps:        458 (2%)
+.fi
+.RE
+
+.PP
+The message \fBFound xing header\fR indicates the input file is a VBR 
+encoded files with a XING ancillary data header.  The only two fields
+updated by \fBmpgedit\fR are the \fBframes\fR (number of frames in encoding)
+and \fBbytes\fR (total encoding size in bytes) fields. \fBh_id\fR indicates the
+MPEG version; only 1=MPEG-1 is recognized. \fBh_layer\fR indicates
+the MPEG layer; valid values are 1, 2 and 3.  \fBh_protect\fR is 1 when
+the copyright protection is enabled, and 0 when not enabled.  \fBsamprate\fR
+is the audio sample rate for the encoding, in hertz (Hz). Both \fBflags\fR 
+and \fBvbr_scale\fR are values internal to the header.  
+.PP
+When the \fB-v\fR option is used, only lines with the (1) tag in the 
+example above are displayed.  These lines are displayed
+for each one second of input file play time.  
+\fBt=\fR is the time offset into the input file.  
+\fBfr=\fR is the frame number for this time offset.
+The file position in bytes (in both decimal and 
+hexadecimal formats) follows \fBpos=\fR.
+.PP
+When the \fB-vv\fR option is used, lines with the (2) tag are displayed 
+in addition to the (1) tag.  
+One (2) line is displayed for each frame present in the MPEG input file.  
+\fBt=\fR is the time offset into the input file,
+and is displayed with 1 millisecond resolution. 
+\fBbr=\fR is the frame encoding bitrate, in kb/s.
+\fBsz=\fR is the frame size, in bytes.
+\fBfr=\fR is the frame number for this time offset. 
+\fBpos=\fR is the file position in bytes,displayed in both decimal and 
+hexadecimal formats.
+.PP
+When the \fB-vvv\fR option is used, lines with the (3) tag are displayed 
+in addition to the (1) and (2) tags. These additional lines display all 
+information contained within an MPEG frame, and are displayed for each
+frame present in the file. Each value is identified by name, followed by
+the un-interpreted value, followed by the interpreted value, appearing 
+within parentheses.
+.PP
+For all \fB-v\fR options listed above, a summary is printed after the 
+entire file is read.  For CBR encoded files, the file name, frame count,
+file size and play time are displayed.  For VBR encoded files, 
+the frame minimum, maximum, and average encoding bitrate is displayed,
+in addition to the CBR summary. Furthermore, for VBR encoded files,
+a summary of the total number of frames encoded for each bitrate present
+in the input file is displayed.
+
+."zzz
+.SH PLAYBACK CONFIGURATION
+mpgedit requires configuration for the sound playback feature to work.
+As root, run \fBmake install\fR.  For Linux as part of the installation,
+the shared library loader is configured to search the directory 
+where \fBmpgedit\fR was installed. These are the actions performed by
+the install process to configure the shared library loader:
+.RS 4
+\fB
+    echo /usr/local/lib >> /etc/ld.so.conf
+    /sbin/ldconfig
+\fR
+.RE
+.PP
+Sound playback is implemented using two mechanisms: 1) an external command
+line MP3 player capable of standard input file playback, and 2)
+the MPGLIB decoder library that ships with the LAME project.
+The default playback configuration uses the MPGLIB-based decoder 
+plugin \fBlibdecoder_mpg123.so\fR.
+.PP
+Two decoder plugin implementations ship with mpgedit: \fBlibdecoder_popen.so\fR
+and \fBlibdecoder_mpg123.so\fR.  \fBlibdecoder_popen.so\fR will execute
+the \fBmp3decoder.sh\fR script for file playback. \fBlibdecoder_mpg123.so\fR is 
+implemented using the
+MPGLIB decoder library present in LAME.  This implementation also serves as 
+a sample implementation of a single process playback plugin that could be
+ported to the Microsoft Windows(R) operating systems, and other 
+operating systems that do not support the popen() system call.
+.PP
+mpgedit attempts to load the playback plugin \fBlibmpgedit_decoder.so\fR when 
+file playback is specified.  When the decoder plugin is loaded, it is used for
+file playback.  When the decoder plugin cannot be loaded, the default
+action is to execute the \fBmp3decoder.sh\fR script. 
+.PP 
+\fBlibmpgedit_decoder.so\fR
+is installed as a symbolic link pointing to one of the playback plugins,
+\fBlibdecoder_mpg123.so\fR or \fBlibdecoder_popen.so\fR.  \fBmake install\fR
+installs the \fBlibdecoder_mpg123.so\fR playback plugin.
+\fBlibdecoder_popen.so\fR can be installed manually when use of a command
+line MP3 player is desired.
+.PP
+To use a different command line MP3 player, configure
+\fBlibdecoder_popen.so\fR as the playback plugin, then
+edit the \fBmp3decoder.sh\fR file to call the desired MP3 player.
+This shell script is then loaded by mpgedit when performing file playback, 
+and provides the flexibility to specify any MP3 player that can play
+files from standard input.
+.SH IMPLEMENTATION LIMITATIONS AND ANOMALIES
+.HP 2
+\- Since release 0.6p1, \fBmpgedit\fR has been tested with MPEG 1 layer 1/2/3,
+MPEG 2 layer 1/2/3 and MPEG 2.5 layer 3 files.  Since MPEG 2.5 layer 1/2 files
+have the same frame
+header structure, it is assumed this program will function properly with
+such files, although no testing on files encoded with this format has occurred.
+.HP 2
+\- While it is possible with \fBmpgedit\fR to join together files that consist of 
+differing encoding versions (MPEG-1 and MPEG-2, for example) and sample 
+rates (44.1KHz and 22.05KHz, for example), caution must be used.
+Although such a file is technically a legal encoding, it is doubtful that 
+all (or any, for that matter) MP3 players will be able to correctly
+render such a file.
+.HP 2
+\- Any ID3 tags present in input files are not present in the output from
+an edit. Output files must be tagged to restore ID3 information.
+.HP 2
+\- mpgedit implements an MPEG audio frame header parser that is tolerant of
+many encoder errors, corrupted data, and files with formats that are not 
+strictly MPEG audio
+files.  When such an encoding error is encountered, all data between the
+last correctly encoded frame and the next recognized frame are silently skipped.
+Other programs, such as \fBmp3_check\fR, perform a more detailed validity 
+check and
+report where errors occur, and are likely to be more robust when handling 
+corrupted data files.
+.HP 2
+\- Many playback problems present in releases of \fBmpgedit\fR prior to
+version 0.6p1 have been fixed.  Using the \fBlibdecoder_mpg123.so\fR
+plugin, \fBmpgedit\fR properly plays all of the ISO MPEG conformance
+files, as well as MPEG 2/2.5 files encoded using \fBlame\fR.
+Two exceptions to the above can be noted.  Win32 does not properly
+handle MPEG 2/2.5 files encoded at with a sample rate of 11025Hz/mono.  A work
+around in the \fBlibdecoder_mpg123.so\fR decoder plugin is implemented,
+but the sound quality suffers.  The MPEG 1 layer 1 mono test file
+\fBhttp://mpgedit.org/mpgedit/testdata/mpeg1/layer1/fl4.mp1\fR does not
+render properly.  All the data used to exercise \fBmpgedit\fR is located 
+at \fBhttp://mpgedit.org/mpgedit/testdata/mpegdata.html\fR.
+.HP 2
+\- During development, the previous name of the program was mp3edit.
+The final name \fBmpgedit\fR was settled on after much development 
+occurred. Because of this, many source files and function
+names are called mp3_. You will also see mpeg_ instead of mpg_ in
+some cases. 
+
+.SH ACKNOWLEDGEMENTS AND HISTORY
+The first prototype implementation of MP3 file editing was based upon
+the mp3_check program, written by Eric Bullen, 
+\fBhttp://sourceforge.net/projects/mp3check\fR.  Because the project goals 
+of mp3_check
+are different than mpgedit, the idea of integrating editing functionality
+into mp3_check was abandoned.  Many of the current command line options 
+for mpgedit can be traced to the early prototype work done with mp3_check.
+.PP
+mpgedit is a completely independent implementation from the early mp3_check
+editing prototype.  While some of the early ideas from this prototype 
+still exist in mpgedit, everything has been re-implemented.  
+.PP
+Finding reference material sufficiently complete to implement mpgedit was
+difficult.  The O'Reilly & Associates book "MP3: The Definitive Guide" by 
+Scot Hacker \fBhttp://www.oreilly.com/catalog/mp3/\fR,
+while accurate in its description of the MPEG audio file frame header
+structure, did not contain sufficient detail to fully implement the
+MPEG file parsing functionality.  The document that proved invaluable
+for completing the MPEG audio frame header parsing code was written by
+\fBPredrag Supurovic\fR, \fBhttp://www.dv.co.yu/mpgscript/mpeghdr.htm\fR.
+.PP
+The MPGLIB decoding engine comes from the MPG123 package, written
+by Michael Hipp (\fBwww.mpg123.de\fR). MPGLIB is released under the GPL.
+The version of MPGLIB used for building the \fBlibdecoder_mpg123.so\fR decoder
+plugin comes from the 3.90 alpha 7 version of LAME
+\fBhttp://sourceforge.net/projects/lame\fR.  
+Earlier versions of LAME do not include a shared library build of MPGLIB,
+which is needed when building the decoder plugin.  The MPGLIB that comes with
+\fBmpg123-0.59r\fR can also be used when linking the \fBlibdecoder_mpg123.so\fR
+plugin.  However, LAME appears to have fixed some bugs that mpg123 has not.
+.PP
+Special thanks go to Jared Benedict <\fBhttp://redjar.org/jared/\fR> and Public
+Radio Exchange <\fBhttp://www.prx.org/\fR> for the donation of a Macintosh
+G3 B&W computer. Completion of the port to Mac OSX 10.3 was possible
+using this system.
+.PP
+The initial port of the command line and curses mpgedit to Mac OSX 10.1
+was done with thanks to Tony Andrea <\fBtony.andrea@pobox.com\fR>.
+.PP
+Thanks to Colin Bell <\fBcpb@tklogic.net\fR> for helping with freshing the 
+Mac OSX 10.1 port.
+
+.SH SEE ALSO 
+\fBxmpgedit\fR(1), \fBmp3decoder.sh\fR(1), \fBdecoder.so\fR(1), 
+\fBdecoder_popen.so\fR(1), \fBdecoder_mpg123.so\fR(1)

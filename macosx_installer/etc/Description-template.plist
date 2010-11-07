@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IFPkgDescriptionDeleteWarning</key>
+	<string></string>
+	<key>IFPkgDescriptionDescription</key>
+	<string>Welcome to the MPGEDIT installer for Mac OS X. This program will install the command-line mpgedit program. MPGEDIT is both a command line and an interactive editing program with a curses-based command shell.
+</string>
+	<key>IFPkgDescriptionTitle</key>
+	<string>Mac OS X MPGEDIT</string>
+	<key>IFPkgDescriptionVersion</key>
+	<string>__MAJOR__.__MINOR__ __RELTYPE____CKPOINT__</string>
+</dict>
+</plist>

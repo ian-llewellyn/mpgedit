@@ -1,0 +1,59 @@
+.\" $Id: scramble.pl.1,v 1.2 2003/09/11 06:14:12 number6 Exp $
+."
+.TH scramble.pl 1 \" -*- nroff -*-
+.SH NAME
+scramble.pl \- Scramble an mp3 file by reordering frames randomly
+
+.SH SYNOPSIS
+.TP 9
+scramble.pl inputfile.mp3
+.SH DESCRIPTION
+\fBscramble.pl\fR is a Perl script that randomizes the order of all the frames
+in \fBinputfile.mp3\fR, saving the edits to the output file
+\fBscramble.mp3\fR. \fBscramble.pl\fR is part of the main
+mpgedit regression test \fBtest1.pl\fR, or can be called as a
+stand\-alone program. \fBscramble.pl\fR is an \fBmpgedit\fR torture test,
+but it can also be used for obscuring the contents of an mp3 file.
+The original input file can later be recovered by calling the reciprocal
+operation \fBunscramble.pl\fR.
+
+These are the steps \fBscramble.pl\fR follows to generate the 
+\fBscramble.mp3\fR file:
+
+.RS 4
+Save off the last frame of \fBinputfile.mp3\fR to the file \fBscramble_x.mp3\fR
+for later use. This must be done because the time duration of this frame
+is likely to be less than a full frame time of 26ms, and will throw off the
+unscramble operation when it appears somewhere in the middle of 
+\fBscramble.mp3\fR
+
+Create a scrambled list of start/stop times for each frame in 
+\fBinputfile.mp3\fR by calling the Perl script \fBscramble_times.pl\fR.
+The list of scrambled start/stop times is saved to the file \fBscramble.out\fR
+for later use by \fBunscramble.pl\fR.
+
+Perform a series of 40-single frame edits controlled by the start/stop times
+listed in the \fBscramble.out\fR file. These edits are all appended to the 
+output file \fBscramble.mp3\fR.
+
+Append the saved final frame \fBscramble_x.mp3\fR to the now scrambled output
+saved in the file \fBscramble.mp3\fR.
+.RS -4
+
+The resultant scrambled output file is now completely unintelligible when
+played back. The only use for this file is as input to the \fBunscramble.pl\fR
+test script. Recovery of the scramble file \fBscramble.mp3\fR is easily 
+accomplished by running \fB./unscramble.pl\fR. The unscrambled output
+is saved to the file \fBdescramble.mp3\fR.
+
+.SH BUGS
+The final frame of \fBinputfile.mp3\fR always appears as the final frame
+of \fBscramble.mp3\fR. The scramble start/stop times are always saved to
+\fBscramble.out\fR. The loss or modification of this file makes recovery
+of \fBdescramble.mp3\fR impossible.  Any ID3 tags present 
+in \fBinputfile.mp3\fR are
+edited away by the scramble/unscramble operation.
+
+.SH SEE ALSO 
+\fBunscramble.pl\fR(1), \fBscramble_times.pl\fR(1), 
+\fBmpgedit\fR(1), \fBxmpgedit\fR(1).

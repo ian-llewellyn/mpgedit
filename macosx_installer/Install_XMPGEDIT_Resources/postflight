@@ -1,0 +1,57 @@
+#!/bin/sh
+gdkpixbuf="/xmpgedit.app/Contents/MacOS/etc/gdk-pixbuf.loaders"
+pangomod="/xmpgedit.app/Contents/MacOS/etc/pango.modules"
+pangorc="/xmpgedit.app/Contents/MacOS/etc/pangorc"
+
+echo "postflight here 1='$1'" >> /tmp/xmpgedit_out.txt
+echo "postflight here 2='$2'" >> /tmp/xmpgedit_out.txt
+echo "postflight here 3='$3'" >> /tmp/xmpgedit_out.txt
+echo "postflight here 4='$4'" >> /tmp/xmpgedit_out.txt
+
+# $2 contains the install directory path
+#
+
+# Modify gdk-pixbuf.loaders first...
+#
+mv $2/$gdkpixbuf $2/${gdkpixbuf}.orig
+if [ $? -ne 0 ]; then
+  echo "ERROR: rename '$2/$gdkpixbuf' failed" >> /tmp/xmpgedit_out.txt
+  exit 1
+fi
+
+sed "s|__PKGROOT__|$2|"  $2/${gdkpixbuf}.orig > $2/${gdkpixbuf}
+if [ ! -s $2/${gdkpixbuf} ]; then
+  echo "ERROR: edit '$2/$gdkpixbuf' failed" >> /tmp/xmpgedit_out.txt
+  exit 1
+fi
+
+# Modify pango.modules next...
+#
+mv $2/$pangomod $2/${pangomod}.orig
+if [ $? -ne 0 ]; then
+  echo "ERROR: rename '$2/$pangomod' failed" >> /tmp/xmpgedit_out.txt
+  exit 1
+fi
+
+sed "s|__PKGROOT__|$2|"  $2/${pangomod}.orig > $2/${pangomod}
+if [ ! -s $2/${pangomod} ]; then
+  echo "ERROR: edit '$2/$pangomod' failed" >> /tmp/xmpgedit_out.txt
+  exit 1
+fi
+
+# Modify pangorc last...
+#
+mv $2/$pangorc $2/${pangorc}.orig
+if [ $? -ne 0 ]; then
+  echo "ERROR: rename '$2/$pangorc' failed" >> /tmp/xmpgedit_out.txt
+  exit 1
+fi
+
+sed "s|__PKGROOT__|$2|"  $2/${pangorc}.orig > $2/${pangorc}
+if [ ! -s $2/${pangorc} ]; then
+  echo "ERROR: edit '$2/$pangorc' failed" >> /tmp/xmpgedit_out.txt
+  exit 1
+fi
+
+# Success!
+exit 0

@@ -1,0 +1,26 @@
+#include "winver.h"
+
+1 VERSIONINFO
+ FILEVERSION 2,4,0,0
+ PRODUCTVERSION 2,4,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS VOS_UNKNOWN
+ FILETYPE VFT_DLL
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Maintainer", "Adam Bernstein\0"
+            VALUE "FileDescription", "Win32 MP3 Playback Plugin\0"
+            VALUE "FileVersion", "0.7.0\0"
+            VALUE "InternalName", "mpgedit\0"
+            VALUE "LegalCopyright", "GPL; See 'COPYING'\0"
+            VALUE "OriginalFilename", "decoder_mpglib.DLL\0"
+            VALUE "ProductName", "mpgedit\0"
+            VALUE "ProductVersion", "0.7.0\0"
+        END
+    END
+END

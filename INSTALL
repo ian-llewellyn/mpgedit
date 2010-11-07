@@ -1,0 +1,157 @@
+mpgedit 0.72 beta, December 2005, Adam Bernstein (http://mpgedit.org/mpgedit/)
+Please report success, bugs, or other issues to number6@mpgedit.org
+
+COMPILATION
+-----------
+Building the software on *NIX platforms:
+
+Linux, Solaris:
+$ ./configure
+
+Note: configure is now just a script that calls ./unix_make.sh.
+
+Windows:
+You must have Visual C++ configured for command line builds.  The
+easiest way to accomplish this is run vcvars32.bat from a cmd shell.
+
+In a directory at the same level as the mpgedit source,
+download the PDCurses 2.4 package and unzip it in a directory
+named 'pdcurses'.
+
+    http://mpgedit.org/mpgedit/pdc24_vc_w32.zip
+
+You should have a directory structure something like this:
+
+    c:\wrk\mpgedit
+    c:\wrk\pdcurses
+
+From a cmd shell, cd into wrk\mpgedit, and run win32_make.bat.
+
+c:\mpgedit> win32_make.bat
+
+This software release has been built and tested on Linux, Solaris and
+Win32 platforms (Windows 95, Windows 98, Windows NT 4.0 and
+Windows 2000 have been tested). 
+
+
+INSTALLATION
+------------
+Linux:
+
+$ su root
+$ make install
+
+    OR
+
+$ su root
+$ ./install.sh
+
+
+By default, install script copies and configures mpgedit under /usr/local
+(bin, lib and man).  You are given the opportunity to change the base
+install directory during the installation process.  
+
+The Linux shared library loader (ld.so) is configured during installation.
+Please remember to add the install executable directory (/usr/local/bin by
+default) to your PATH environment variable.
+
+Windows:
+
+mpgedit uses Inno Setup (IS) to generate a Windows install package.
+Currently, version 3.0.7b is being used to generate the production
+install packages.  The *.iss scripts will probably work correctly
+with later versions.
+
+The xmpgedit installer resides in after a successful build:
+
+    mpgedit\gui\Output\setup.exe
+
+
+TESTING
+-------
+Linux:
+
+The current regression test is "test1.sh".  You can run the regression
+test by simply executing:
+
+$ test1.pl
+
+This test heavily exercises the editing features of mpgedit.  Each test 
+performs a series of edits that results in an output file that will be
+identical to the original, unedited file.  The resultant edited file is
+then compared against the original source file.
+
+The regression tests are implemented in Perl.  They will run on Windows
+using Active Perl, or other Perl packages for Win32.  Active Perl 5.6.1
+is currently used for mpgedit development on Windows.
+
+Another test that can be performed using the curses mode of mpgedit
+is a simplified version of the "slice and splice" test performed by
+test1.pl.  Perform the following actions to execute this test:
+
+The slice test is performed with the following actions:
+
+  - Start mpgedit with no options
+  - Press 'Enter' to close the help window
+  - Enter the 'L' command, then load "test1.split"
+  - Enter the 'E' command, save abandoned edits to file "test1.split2
+
+The splice test is performed with the following actions:
+
+  - Start mpgedit with no options
+  - Press 'Enter' to close the help window
+  - Enter the 'L' command, then load "test1.join"
+  - Enter the 'n' command, entering the output file "test1_splice.mp3"
+  - Enter the 'e' command, save abandoned edits to file "test1.join2"
+
+Files test1.mp3 and test1_splice.mp3 should be identical.  This can be
+verified by comparing these two files with diff:
+
+  diff test1.mp3 test1_splice.mp3
+
+Cleanup after this test with the following command:
+
+  rm -f test1.splice.mp3 test1_*.mp3 test1_*.idx test1.split2 test1.join2
+
+BUILD REQUIREMENTS
+------------------
+Linux:
+The C compiler (gcc) and make must be installed in order to build mpgedit.
+These are the modules I have installed in my development system:
+  egcs-1.1.2-24
+  make-3.77-6
+
+Windows:
+Currently, mpgedit is built with MicroSoft Visual Studio 6.0.  Additionally
+you must have your environment configured for command line builds. Running
+vcvars32.bat before win32_make.bat should be sufficient to build mpgedit.
+You must also have the pdcurses package installed in a directory
+at a peer level with mpgedit.  You can download pdcurses from:
+
+    http://mpgedit.org/mpgedit/pdc24_vc_w32.zip
+
+This file unzips into a directory named 'pdcurses'.  The mpgedit makefiles
+expects pdcurses to be installed in a directory of this name.
+
+Inno Setup is used by the Win32 build to generate the Windows installer.
+This tool is available from:
+
+    http://www.jrsoftware.org/isinfo.php
+
+The build of xmpgedit for Windows uses the GTK+ toolkit for Win32.
+You must have installed the GTK+ development libraries for this build to
+complete successfully.  GTK+ for Win32 is available from:
+
+    http://www.gimp.org/~tml/gimp/win32/downloads.html
+
+
+UNINSTALLATION
+--------------
+Linux:
+$ su root
+$ make uninstall
+
+    OR
+
+$ su root
+$ ./install.sh -u

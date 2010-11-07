@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Script to cleanup cruft installed by mpgedit outside of the official
+# installed mpgedit.app directory.  The default install location is
+# /Applications/mpgedit.app, unless overridden at install time.
+#
+# This is a daily cron job run by the system at 3:15 am.
+#
+UNINSTALLED=0
+
+# Check if symbolic link /usr/bin/mpgedit needs deleting
+#
+if [ ! -s /usr/bin/mpgedit ]; then
+  UNINSTALLED=1
+  rm -f /usr/bin/mpgedit
+fi
+
+# Check if symbolic link /usr/lib/libmpgedit_decoder.dylib needs deleting
+#
+if [ ! -s /usr/lib/libmpgedit_decoder.dylib ]; then
+  UNINSTALLED=1
+  rm -f /usr/lib/libmpgedit_decoder.dylib
+  rm -f /usr/bin/mpgedit
+fi
+
+#
+# Clean up the /etc/manpath.config file
+#
+if [ $UNINSTALLED -eq 1 ]; then
+
+  # Fix up /etc/manpath.conf file.
+  #
+  mv /etc/manpath.config /etc/manpath.config_mpgedit
+
+  # Remove previous MPGEDIT manpath configuration
+  #
+  sed '/OPTIONAL_MANPATH.*\/mpgedit.app\/.*/d' /etc/manpath.config_mpgedit > \
+    /etc/manpath.config
+
+
+  #
+  # Finally, remove this cleanup script
+  #
+  rm -f /etc/periodic/daily/200.mpgedit_uninstall_check
+fi
+exit 0

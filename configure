@@ -1,0 +1,18 @@
+#! /bin/sh
+
+echo ""
+echo "============================================================"
+echo "Configure is no longer used when building mpgedit."
+echo "'unix_make.sh' is executed."
+echo ""
+echo "For win32 builds, run 'win32_make.bat'"
+echo ""============================================================
+echo ""
+
+# Create top-level README file from template file
+if [ ! -f README ]; then
+  ./mk_mpgedit_iss_readme.sh
+fi
+
+./make_alsa.sh
+./unix_make.sh

@@ -1,0 +1,109 @@
+.\" %W%	%G%
+."
+.TH decoder.so 1 \" -*- nroff -*-
+.SH NAME
+libmpgedit_decoder.so, libdecoder_popen.so, libdecoder_mpg123.so 
+\- MPEG 1/2/2.5 audio player plugin
+
+.SH SYNOPSIS
+.B libmpgedit_decoder.so
+.br
+.BI "libdecoder_popen.so
+.br
+.BI "libdecoder_mpg123.so
+
+.SH DESCRIPTION
+\fBlibmpgedit_decoder.so\fR, \fBlibdecoder_popen.so\fR, and \fBlibdecoder_mpg123.so\fR
+are MPEG audio player plugins for \fBmpgedit\fR.  The plugin named
+\fBlibmpgedit_decoder.so\fR is loaded by
+\fBmpgedit\fR.  By default, this is configured as a
+symbolic link pointing to the player plugin \fBlibdecoder_mpg123.so\fR.
+.PP
+The \fBlibdecoder_mpg123.so\fR plugin makes calls to the MPGLIB decoding
+engine to decode MPEG audio frames, then writes the decoded PCM data to
+the audio device /dev/dsp for playback.
+.PP
+The \fBlibdecoder_popen.so\fR plugin is implemented to call the
+\fBpopen\fR(3) system call, which executes the decoder shell script
+\fBmp3decoder.sh\fR.
+.PP
+The mechanism implemented in \fBlibdecoder_popen.so\fR is the
+default audio playback mechanism for UNIX platforms when the
+\fBlibmpgedit_decoder.so\fR plugin cannot be loaded. The Win32
+implementation has no such fail over, and merely calls stub
+functions. The purpose of the audio player plugin mechanism is to
+provide a more portable audio playback mechanism for \fBmpgedit\fR.
+The use of the \fBpopen(3)\fR function introduces a strong
+UNIX dependency, which cannot be ported to operating systems that
+do not support \fBpopen\fR(3) (e.g., Windows).
+.SH DECODER PLUGIN API
+.B void *mpgdecoder_alloc(void);
+.sp
+.BI "void mpgdecoder_free(void *ctx);
+.sp
+.BI "void mpgdecoder_init(void *ctx);
+.sp
+.BI "FILE *mpgdecoder_open(void *ctx, int sample_rate, int stereo);
+.sp
+.BI "void mpgdecoder_close(void *ctx);
+.sp
+.BI "void mpgdecoder_play_frame(void *ctx, FILE **playfp, unsigned char *buf, int len, int sample_rate, int stereo);
+.PP
+The \fBmpgdecoder_alloc\fR function allocates a new MPEG decoder context, which
+is passed to all of the functions in the plugin API.  This context is
+released by \fBmpgdecoder_free\fR when \fBmpgedit\fR is shut down.  The decoder
+context \fBctx\fR is used by the decoder plugin to store the state of the
+MPEG decoder, and is treated as opaque data by the caller of this plugin API.
+.PP
+The \fBmpgdecoder_init\fR function is called once every time audio play back 
+is initiated.  This provides the opportunity to initialize the
+MPEG audio decoder to a known state before starting playback of a new audio
+segment.
+.PP
+The \fBmpgdecoder_open\fR function is called once every time audio playback
+is initiated. The audio segment sample rate, in hertz, is passed via the
+\fBsample_rate\fR parameter. Typical values for this parameter are 22050 and
+44100. The \fBstereo\fR parameter is a boolean value, with a value of 1
+when the playback audio segment is stereo, and 0 when mono. 
+.PP
+\fBWarning: \fR
+The return value from \fBmpgdecoder_open\fR should only be tested in a boolean 
+expresssion for the success or failure of \fBmpgdecoder_open\fR, where
+non-zero is success and zero (NULL) is failure.  You cannot treat the return
+as a file pointer, as the function type would indicate.  This is a change
+from \fBmpgedit 0.5\fR, and was necessary for support of the Win32 port
+of \fBmpgedit\fR.  Generally it is a "bad thing" to change function semantics
+like this, since this consititues an API change.  However, as the return
+value from \fBmpgdecoder_open\fR was treated as an opaque 
+value by the caller, this change should not break any code.
+.PP
+The \fBmpgdecoder_close\fR function is called once every time audio playback
+has completed. This function must be called before calling 
+\fBmpgdecoder_open\fR again.
+.PP
+The \fBmpgdecoder_play_frame\fR function is called to playback one frame 
+of MPEG audio from the audio segment.  The \fBplayback\fR parameter is the
+return value from a previous call to \fBmpgdecoder_open\fR.  The MPEG audio
+data to be decoded is contained in \fBbuf\fR, with a length of
+\fBlen\fR.  The \fBsample_rate\fR and \fBstereo\fR parameters are the
+sample rate and stereo/mono value for the current frame of data being decoded.
+These values can be different than what was passed to \fBmpgdecoder_open\fR,
+and may be different for each MPEG audio frame being decoded, although 
+typically this is not the case.
+
+.SH IMPLEMENTATION LIMITATIONS AND ANOMALIES
+Different platform's decoder plugin end with a different extension. Most UNIX
+and UNIX-like platforms are \fB.so\fR, HP-UX is \fB.sl\fR, Mac OSX 
+is \fB.dylib\fR, and Windows is \fB.dll\fR.  Not all error messages 
+involving the decoder plugin display the correct extension, 
+invariably \fB.so\fR will be displayed over other extensions.
+
+.SH ACKNOWLEDGEMENTS
+The \fBlibdecoder_popen.so\fR plugin calls \fBmp3libdecoder.sh\fR, which by default 
+depends on the MPEG audio player mpg123, written
+by Michael Hipp (\fBwww.mpg123.de\fR), and released under the GPL.
+The \fBlibdecoder_mpg123.so\fR plugin depends on
+the MPGLIB decoding engine, which comes from the MPG123 package, written
+by Michael Hipp (\fBwww.mpg123.de\fR). MPGLIB is released under the GPL.
+.SH SEE ALSO
+\fBmpgedit\fR(1), \fBxmpgedit\fR(1), \fBmp3decoder.sh\fR(1)

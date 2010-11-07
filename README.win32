@@ -1,0 +1,153 @@
+This is the binary tarball of mpgedit __MAJOR__.__MINOR__ __RELTYPE____CKPOINT__ Windows, dated __MONTH__ __YEAR__.
+This product has been built using Microsoft Visual Studio 6.0. This build is
+known to function on Windows 98, Windows NT 4.0, Windows 2000 and XP. It is
+likely to function on Windows 95 and WindowsME.  Please let me know about
+your success/failure with running this code.
+
+The major feature of this release is the graphical interface version
+of mpgedit.  This product is available for Linux and Windows at this
+time.  The Windows version is known to function on Windows 98->Windows XP.
+The Linux implementation is built on RedHat 6.2 and RedHat 7.1 systems,
+and should function on RedHat 6.x, 7.x and 8.x systems.
+
+
+
+SOURCE CODE
+-----------
+CVS:
+
+cvs -d \
+  :pserver:anonymous@mpgedit.org:/usr/local/cvsroot login
+
+       There is no password, just press Enter
+
+cvs -z3 -d \
+  :pserver:anonymous@mpgedit.org:/usr/local/cvsroot \
+  co -r mpgedit___RELEASE__ mpgedit
+
+
+
+COMPILING
+---------
+You must have Visual C++ configured for command line builds.  The
+easiest way to accomplish this is run vcvars32.bat from a cmd shell.
+
+Download the source from CVS for 'mpgedit___RELEASE__'.
+In a directory at the same level as the mpgedit source,
+download the PDCurses 2.4 package and unzip it in a directory
+named 'pdcurses'.
+
+You also need the GTK++ for Windows development packages.  The installation
+of this SDK is quite harrowing, as it consists of about a dozen
+individual components.  At some time later, I will probably build
+an installer for this SDK.
+
+You should have a directory structure something like this:
+
+    c:\wrk\mpgedit
+    c:\wrk\pdcurses
+    c:\wrk\gtk2.0
+
+From a cmd shell, cd into wrk\mpgedit, and run win32_make.bat.
+
+
+
+INSTALLATION
+------------
+There is a native windows installer for xmpgedit.  Download the setup.exe
+and execute.
+
+
+
+UNINSTALLATION
+--------------
+Uninstall xmpgedit with the Windows "Add/Remove Programs" application:
+
+    Settings->Control Panel->Add/Remove Programs.
+
+Remove the xmpgedit 0.7beta package.
+
+
+
+DOCUMENTATION
+-------------
+HTML versions of the mpgedit man pages are available on the mpgedit
+home page:
+
+    http://mpgedit.org/mpgedit/docs.html
+
+
+
+FILE LIST
+---------
+                                                       README
+-rwxr--r--   1 number6  slocate    121344 Feb 27 00:03 curses.dll*
+-rwxr--r--   1 number6  slocate    198268 Feb 27 00:03 libmpgedit_decoder.dll*
+-rwxr--r--   1 number6  slocate    235320 Feb 27 00:03 mpgedit.exe*
+-rwxr--r--   1 number6  slocate    189204 Feb 27 00:03 mpgedit_nocurses.exe*
+-rw-r--r--   1 number6  slocate    596332 Feb 27 00:04 test1.mp3
+
+
+      Checksum                    File Name
+      --------                    ---------
+                                  README
+d5a933ee905e667580b25887645f891f  curses.dll
+fe1b111eea56e98703fda3a3b19c30a9  libmpgedit_decoder.dll
+74dec3f9ad34bb787c586a346386292e  mpgedit.exe
+2a55264f1792fca519da4a5fa5531957  mpgedit_nocurses.exe
+8bf58c3868a8bc51f38bc77dab649983  test1.mp3
+
+
+
+     mpgedit - MPEG 1/2/2.5 (MP3) audio file editor
+               Version __MAJOR__.__MINOR____RELTYPE____CKPOINT__ __MONTH__ __YEAR__
+                   http://mpgedit.org
+        Copyright (C) 2001-__YEAR__ by Adam Bernstein
+
+
+Written by: Adam Bernstein <number6@mpgedit.org>, released under
+the GPL.  See "COPYING" for full details.
+
+The mpgedit audio playback plugins uses the MPGLIB decoding engine,
+from the MPG123 package, written by: Michael Hipp (www.mpg123.de)
+MPGLIB is released under the GPL.
+
+The version of MPGLIB used in this release comes from LAME 3.90 alpha 7,
+released under the GNU LESSER PUBLIC LICENSE.
+
+Copyrights (c) 1999,2000,2001 by Mark Taylor: LAME
+Copyrights (c) 1998 by Michael Cheng: LAME
+Copyrights (c) 1995,1996,1997 by Michael Hipp: mpglib
+
+curses.dll comes from the PDCurses 2.4 package (pdc24_vc_w32.zip),
+http://pdcurses.sourceforge.net/index.html
+
+The Gimp Toolkit (GTK) is used by xmpgedit, http://gtk.org.
+
+The Win32 installer uses Inno Setup (IS), Copyright (C) 1997-2003++
+Jordan Russell (http://www.jrsoftware.org/isinfo.php)
+
+The MD5 checksum library (http://sourceforge.net/projects/libmd5-rfc/)
+is Copyright (C) 1999, 2000, 2002 Aladdin Enterprises.
+All rights reserved.
+
+The libdecoder_mad.so playback plugin is implemented using libmad,
+libmad - MPEG audio decoder library, Underbit Technologies, Inc.
+Copyright (C)  2000-2004 Underbit Technologies, Inc.
+http://www.underbit.com/products/mad/
+
+The getopt.c win32/getopt.h sources are originally from GNU getopt,
+Copyright (C) 1987, 88, 89, 90, 91, 92, 1993, Free Software Foundation, Inc.
+
+audio_macosx.c: originally written by Guillaume Outters. AudioUnit version
+by Steven A. Kortze <skortze@sourceforge.net>
+
+audio_aix.c: Code by Juergen Schoew <juergen.schoew@unix-ag.org>;
+Tomas Oegren <stric@acc.umu.se>, (code for audio_close delay);
+Cleanups and testing by Niklas Edmundsson <nikke@ing.umu.se>.
+
+audio_hp.c, audio_oss.c, audio_win32.c, audio_sun.c: No attributions
+present in source code.  Originally part of mpg123 project, copyrights
+(c) 1995,1996,1997 by Michael Hipp.
+
+As well as additional copyrights as documented in the source code.

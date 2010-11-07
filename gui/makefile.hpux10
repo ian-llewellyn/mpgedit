@@ -1,0 +1,43 @@
+CC          = c89
+CFLAGS      = +e +DA1.0 +z -Dlint -D_HPUX_SOURCE $(CDEBUGFLAGS) $(CFLAGS1)
+CFLAGS1     = -I.. `pkg-config --cflags gtk+-2.0`
+CDEBUGFLAGS = -g
+#EFENCE = -lefence
+
+
+all: xmpgedit
+
+XMPGEDIT_OBJS = player.o editor.o volume.o
+xmpgedit: $(XMPGEDIT_OBJS) ../libmpgeditlib.a
+	$(CC) $(CFLAGS) $(XMPGEDIT_OBJS) -o xmpgedit -L.. -lmpgedit \
+               `pkg-config --libs gtk+-2.0` $(EFENCE)
+
+
+swindow3: swindow3.o
+	$(CC) $(CFLAGS) swindow3.o -o swindow3 `pkg-config --libs gtk+-2.0`
+
+swindow2: swindow2.o
+	$(CC) $(CFLAGS) swindow2.o -o swindow2 `pkg-config --libs gtk+-2.0`
+
+spinner: spinner.o
+	$(CC) $(CFLAGS) spinner.o -o spinner `pkg-config --libs gtk+-2.0`
+
+editor: editor.o
+	$(CC) $(CFLAGS) editor.o -o editor `pkg-config --libs gtk+-2.0`
+
+volume_main: volume.c
+	$(CC) $(CFLAGS) -D_MAIN -c volume.c -o volume_main.o
+	touch volume_main
+
+VOLUME_OBJS = volume_main.o ../volumeif.o
+volume: volume_main
+	$(CC) $(CFLAGS) $(VOLUME_OBJS) -o volume `pkg-config --libs gtk+-2.0`
+
+clean:
+	$(RM) -f $(PLAY_OBJS) player.o editor.o spinner.o xmpgedit \
+                 volume.o volume spinner editor volume_main.o \
+                 $(XMPGEDIT_OBJS)
+
+../playif.o: ../playif.h
+player.o: editor.h ../editif.h
+editor.o: editor.h ../editif.h

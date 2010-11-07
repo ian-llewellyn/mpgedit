@@ -1,0 +1,28 @@
+                      HOWTO Build mpgedit Fink Package
+
+1) Do normal production mpgedit build for all platforms, using make_dist.sh.
+
+2) md5sum mpgedit_0-72beta/mpgedit_0-72beta_src.tgz
+
+3) Edit mpgedit_0-72beta/macosx/mpgedit/mpgedit.info file, and update
+   the Source-MD5: line with the md5sum just computed.
+
+4) Copy the updated mpgedit.info file to this directory on the OSX build box:
+     /sw/fink/10.3/local/main/finkinfo
+
+5) Delete these files on the OSX build box:
+
+
+/sw/src/mpgedit_0-72beta_src.tgz
+/sw/fink/10.3/local/main/binary-darwin-powerpc/mpgedit_0-72-1_darwin-powerpc.deb
+/sw/fink/debs/mpgedit_0-72-1_darwin-powerpc.deb
+
+Note: Delete the versions for the build being performed.
+
+6) run this command from /sw/fink/10.3/local/main/finkinfo:
+     fink build mpgedit
+
+7) The build output is: /sw/fink/debs/mpgedit_0-72-1_darwin-powerpc.deb
+
+8) Remember to update the public mpgedit-0-72beta.info file, and include 
+   in the distribution build tree.

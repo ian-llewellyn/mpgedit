@@ -1,0 +1,21 @@
+#
+# mp3get: streaming mp3 download utility makefile
+#
+# Copyright (C) 2004 Adam Bernstein
+#
+
+CFLAGS       = $(CFLAGS1) $(CDEBUGFLAGS) $(INCLUDES)
+
+CFLAGS1      = /nologo /W3 /I. /I$(PDCURSES_DIR) /DNOANALYSIS /DSTDC_HEADERS \
+               /Iinclude /Ilibmp3lame /Impglib /DWIN32 /DGENERIC /DNOXFERMEM
+
+CDEBUGFLAGS  = /Z7 /DEBUGTYPE:CV
+
+INCLUDES = /I..\..\ /I..\..\mp3lib
+
+
+mp3get.exe: mp3get.obj httpget.obj ..\..\getopt.obj
+	$(CC) $(CFLAGS) $(LDFLAGS) mp3get.obj ..\..\getopt.obj httpget.obj -o mp3get.exe wsock32.lib
+
+clean:
+	$(RM) mp3get.obj httpget.obj

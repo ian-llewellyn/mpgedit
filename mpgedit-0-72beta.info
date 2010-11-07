@@ -1,0 +1,21 @@
+Package: mpgedit
+Version: 0-72beta
+Revision: 1
+Maintainer: Adam Bernstein <number6@mpgedit.org>
+Source: http://www.mpgedit.org/mpgedit/download/mirror1/0_72/mpgedit_%{v}_src.tgz
+Source-MD5: b4a6b4f67b35b10f43f12f6740d33934
+BuildDepends: gtk+2-dev, atk1-shlibs, glib2-shlibs, gtk+2-shlibs, libgettext3-shlibs, libiconv-dev, pango1-xft2-shlibs
+CompileScript: cd mpgedit; ./configure
+InstallScript: cd mpgedit; ./install.sh -y -F -m %i/share/man %i
+DocFiles: mpgedit/NEWS mpgedit/AUTHORS mpgedit/README mpgedit/COPYING mpgedit/ChangeLog mpgedit/TODO mpgedit/THANKS
+Description: MPEG 1 / 2 / 2.5 Audio File Editor
+DescDetail: <<
+mpgedit is an MPEG 1 layer 1/2/3 (mp3), MPEG 2, and MPEG 2.5 audio file 
+editor that is capable of processing both Constant Bit Rate (CBR) and
+Variable Bit Rate (VBR) encoded files.
+<<
+DescPackaging: <<
+MacOS X release.
+<<
+Homepage: http://www.mpgedit.org/mpgedit/
+License: GPL

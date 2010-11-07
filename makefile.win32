@@ -1,0 +1,187 @@
+PDCURSES_DIR = ../pdcurses
+
+CFLAGS       = $(CFLAGS1) $(CDEBUGFLAGS)
+
+CFLAGS1      = /nologo /W3 /I. /I$(PDCURSES_DIR) /DNOANALYSIS /DSTDC_HEADERS \
+               /Iinclude /Ilibmp3lame /Impglib /DWIN32 /DGENERIC /DNOXFERMEM \
+               $(INCLUDEMAD)
+
+CDEBUGFLAGS  = /Z7 /DEBUGTYPE:CV 
+
+LDFLAGS      = /nologo /incremental:no
+
+LDDEBUGFLAGS = /machine:i386 /debug /debugtype:cv /PDB:none 
+
+LIBS         = mpgedit.lib
+LIBMAD       = mad\win32\libmad.lib
+INCLUDEMAD   = /Imad/include  
+
+RM           = del /f
+
+
+mpgeditlib_objs = decoder_win32.obj editif.obj header.obj \
+                  mp3time.obj mpegfio.obj mpegindx.obj mpegstat.obj   \
+                  pcmlevel.obj \
+                  playif.obj plugin_unix.obj \
+                  xing_header.obj segment.obj md5lib\md5.obj
+
+MPGEDIT_OBJS = getopt.obj mp3_header.obj wav16.obj
+
+PLUGIN_OBJS  = decoder_mpg123.obj audio.obj volumeif.obj wmixer.obj
+
+PLUGIN_MAD_OBJS  = decoder_mad.obj audio.obj volumeif.obj wmixer.obj
+
+vbr_objs     = vbr_patch.obj xing_header.obj mpegfio.obj header.obj
+
+NOCURSES     = cursesstub.obj
+
+CURSES       = mpegcurses.obj mpgsleep.obj cursutil.obj parsename.obj
+
+LIBCURSES    = $(PDCURSES_DIR)/curses.lib
+
+all: mkbuildnum.exe mpgedit_nocurses.exe mpgedit.exe \
+     mp3_vbrpatch.exe libmpgedit_decoder.dll mad\win32\libmpgedit_decoder.dll \
+     mpgedit.dll installer
+
+mkbuildnum.exe: mkbuildnum.obj
+	link $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:mkbuildnum.exe mkbuildnum.obj
+
+mpgedit_buildnum.h:
+	mkbuildnum Win32 > mpgedit_buildnum.h
+	
+mpgedit_nocurses.exe: $(MPGEDIT_OBJS)  $(NOCURSES) mpgedit.dll
+	link $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:mpgedit_nocurses.exe \
+             $(MPGEDIT_OBJS) $(NOCURSES) mpgedit.lib winmm.lib
+
+mpgedit.exe: $(MPGEDIT_OBJS)  $(CURSES) mpgedit.dll
+	link $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:mpgedit.exe $(MPGEDIT_OBJS) \
+             $(CURSES) $(LIBCURSES) mpgedit.lib winmm.lib
+
+
+tstheader.exe: tstheader.obj header.obj
+	$(CC) -o $@ tstheader.obj header.obj
+
+readheader.exe: readheader.obj header.obj
+	$(CC) -o $@ readheader.obj mpgedit.lib
+
+readframes.exe: readframes.obj header.obj
+	link $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:$@ \
+            readframes.obj header.obj $(LIBS)
+
+readframes1.exe: readframes1.obj header.obj getopt.obj
+	link $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:$@ \
+            readframes1.obj header.obj getopt.obj $(LIBS) $(LIBMAD)
+
+mpgsleep_main.obj: mpgsleep.c
+	$(CC) $(CFLAGS) /D_UNIT_TEST /Fompgsleep_main.obj -c mpgsleep.c 
+
+mpgsleep.exe: mpgsleep_main.obj
+        $(CC) -o $@ mpgsleep_main.obj
+
+simple_play.exe: simple_play.obj mpgedit.dll
+	link $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:simple_play.exe simple_play.obj mpgedit.lib
+
+ints.exe: ints.obj xing_header.obj
+	link $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:ints.exe ints.obj xing_header.obj
+
+listlevels.exe: listlevels.obj getopt.obj
+	link $(LDFLAGS) $(LDDEBUGFLAGS) -OUT:listlevels.exe \
+             listlevels.obj getopt.obj mpgedit.lib
+
+mp3_vbrpatch.exe: $(vbr_objs)
+        $(CC) -o $@ $(vbr_objs)
+
+mpgedit.dll: $(mpgeditlib_objs)
+	link $(LDFLAGS) $(LDDEBUGFLAGS) /DLL -out:mpgedit.dll \
+             $(mpgeditlib_objs) winmm.lib
+
+decoder_mpg123.obj: decoder_mpg123.c
+	$(CC) $(CFLAGS) -D_NO_STATIC -c decoder_mpg123.c
+
+libmpgedit_decoder.dll: $(PLUGIN_OBJS) decoder_mpglib.obj
+	link $(LDFLAGS) $(LDDEBUGFLAGS) /DLL -out:libmpgedit_decoder.dll \
+             $(PLUGIN_OBJS) decoder_mpglib.obj mpglib/mpglib.lib \
+             winmm.lib user32.lib
+
+decoder_mpglib.obj:
+        rc  /r /fodecoder_mpglib.res decoder_mpglib.rc
+        cvtres /MACHINE:IX86 /NOLOGO /OUT:decoder_mpglib.obj decoder_mpglib.res
+
+decoder_mad.obj: decoder_mad.c
+	$(CC) $(CFLAGS) -D_NO_STATIC -c decoder_mad.c
+
+mad\win32\libmpgedit_decoder.dll: $(PLUGIN_MAD_OBJS) decoder_madlib.obj
+	link $(LDFLAGS) $(LDDEBUGFLAGS) /DLL -out:mad\win32\libmpgedit_decoder.dll \
+             $(PLUGIN_MAD_OBJS) decoder_madlib.obj mad\win32\libmad.lib \
+             winmm.lib user32.lib
+
+decoder_madlib.obj:
+        rc  /r /fodecoder_madlib.res decoder_madlib.rc
+        cvtres /MACHINE:IX86 /NOLOGO /OUT:decoder_madlib.obj decoder_madlib.res
+
+installer: output\setup.exe
+mpgedit_sdk: output\mpgedit_sdk.exe
+
+output\setup.exe: mpgedit_installer.iss
+	iscc mpgedit_installer.iss
+
+output\mpgedit_sdk.exe: mpgedit_sdk.iss
+	iscc mpgedit_sdk.iss
+
+audio.obj:          audio_win32.c
+version.h:          mpgedit_buildnum.h
+decoder.obj:        decoder.h
+decoder_mpg123.obj: mpglib/interface.h decoder.h
+header.obj:         portability.h header.h
+mp3_header.obj:     portability.h header.h mp3time.h mpegindx.h xing_header.h \
+                    mpegfio.h mp3_header.h mpegcurses.h decoder.h plugin.h    \
+                    mpgedit_buildnum.h pcmlevel.h segment.h
+mp3_time.obj:       mp3time.h header.h mp3time.h header.h mpegfio.h
+mpeg_indx.obj:      mpegindx.h
+mpegcurses.obj:     portability.h mp3time.h mp3_header.h mpegcurses.h \
+                    parsename.h
+mpegfio.obj:        mpegfio.h header.h
+mpegindx.obj:       portability.h mpegfio.h header.h mp3time.h mp3_header.h \
+                    xing_header.h
+plugin_unix.obj:    portability.h decoder.h
+tstheader.obj:      header.h
+vbr_patch.obj:      xing_header.h mpegfio.h header.h
+xing_header.obj:    xing_header.h mpgedit_buildnum.h
+
+listlevels.obj:     pcmlevel.h segment.h
+
+pcmlevel.obj:       pcmlevel.h xing_header.h
+
+segment.obj:        pcmlevel.h segment.h
+
+
+clean:
+	-$(RM) $(MPGEDIT_OBJS) $(mpgeditlib_objs)
+	-$(RM) $(PLUGIN_OBJS)
+	-$(RM) $(PLUGIN_MAD_OBJS)
+	-$(RM) $(NOCURSES)
+	-$(RM) $(CURSES)
+	-$(RM) mpgedit.exe
+	-$(RM) mpgedit_nocurses.exe
+	-$(RM) libmpgedit_decoder.dll
+	-$(RM) libmpgedit_decoder.lib
+	-$(RM) mad\win32\libmpgedit_decoder.dll
+	-$(RM) mad\win32\libmpgedit_decoder.lib
+	-$(RM) decoder_mpglib.res
+	-$(RM) decoder_mpglib.obj
+	-$(RM) decoder_mpglib.lib
+	-$(RM) decoder_madlib.res
+	-$(RM) decoder_madlib.obj
+	-$(RM) decoder_madlib.lib
+	-$(RM) mpgedit_buildnum.h
+	-$(RM) mkbuildnum.exe
+	-$(RM) mkbuildnum.obj
+	-$(RM) mpgedit.lib
+	-$(RM) mpgedit.dll
+	-$(RM) mpgsleep.obj
+	-$(RM) output\setup.exe
+	-$(RM) output\mpgedit_sdk.exe
+	-$(RM) readframes.obj
+	-$(RM) readframes1.obj
+	-$(RM) tstheader.obj
+	-$(RM) vbr_patch.obj

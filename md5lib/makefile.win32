@@ -1,0 +1,17 @@
+CC      = CL
+CFLAGS  = /nologo $(CDEFINES) /GD /O2 /W3
+LDFLAGS = /nologo
+RM      = del /f
+o       = .obj
+e       = .exe
+
+all: example$e md5main$e
+
+example$e: example$o md5$o
+	$(CC) $(LDFLAGS) -o example$e example$o md5$o
+
+md5main$e: md5main$o md5$o
+	$(CC) $(LDFLAGS) -o md5main$e md5main$o md5$o
+
+clean:
+	$(RM) example$o md5$o md5main$o example$e md5main$e

@@ -1,0 +1,9 @@
+dist\py_mpgedit-0.3beta.win32.exe: setup_pympgedit.py
+	set MPGEDITDIR=..\..\..
+	setup_pympgedit.py bdist_wininst
+
+clean:
+	del dist\py_mpgedit-0.3beta.win32.exe
+
+install:
+        dist\py_mpgedit-0.3beta.win32.exe

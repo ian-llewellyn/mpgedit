@@ -1,0 +1,8 @@
+py_mpgedit SDK 0.2 beta 
+
+    * Added volume control
+    * Fixed exception handling when not using callbacks
+
+py_mpgedit SDK 0.3 beta 
+
+    * Changed implementation to use Python ctypes module
