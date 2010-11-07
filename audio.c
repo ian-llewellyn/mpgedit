@@ -39,7 +39,7 @@
  */
 
 #ifndef lint
-static char SccsId[] = "$Id: audio.c,v 1.4.2.1 2008/07/13 21:58:12 number6 Exp $";
+static char SccsId[] = "$Id: audio.c,v 1.5 2009/02/04 07:45:45 number6 Exp $";
 #endif
 
 #if defined(__linux)

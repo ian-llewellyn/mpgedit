@@ -14,8 +14,27 @@ NNNN
 # need to be manually configured.
 if [ -f /usr/include/alsa/asoundlib.h ]; then
 cat<<NNNN>>alsa.def
-ALSA_DEFINES = -DALSA
+ALSA_DEFINES = -DALSA -DASOUNDLIB_H
 ALSA_LIB     = -lasound
+NNNN
+elif [ -f /usr/include/sound/asound.h ]; then
+cat<<NNNN>>alsa.def
+ALSA_DEFINES = -DALSA -DASOUND_H
+ALSA_LIB     = -lasound
+NNNN
+fi
+if [ ! -f /usr/include/mad.h ]; then
+cat<<NNNN>>alsa.def
+INCLUDEMAD  = -Imad/include
+NNNN
+fi
+if [ ! -f /usr/lib/libmad.so ]; then
+cat<<NNNN>>alsa.def
+LIBMAD      = -Lmad/linux -lmad
+NNNN
+else
+cat<<NNNN>>alsa.def
+LIBMAD      = -lmad
 NNNN
 fi
 

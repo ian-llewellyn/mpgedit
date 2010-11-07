@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #
 # Script to build mpgedit RPMS from a source code bundle. 
 # How to use
@@ -140,6 +140,10 @@ MPGEDITSRCTGTRPM="mpgedit-$MAJ.${RELEASE}-${REV}.src.rpm"
 XMPGEDITSRCTGTRPM="xmpgedit-$MAJ.${RELEASE}-${REV}.src.rpm"
 MPGEDITMANSRCTGTRPM="mpgedit-man-$MAJ.${RELEASE}-${REV}.src.rpm"
 
+if [ -f $MPGEDITMANTGTRPM ]; then
+  echo "RPM files already exist"
+  exit 0
+fi
 
 #
 # Copy the template .spec files to the release version names

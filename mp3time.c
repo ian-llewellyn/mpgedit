@@ -20,7 +20,7 @@
  */
 
 #ifndef lint
-static char SccsId[] = "$Id: mp3time.c,v 1.16.2.4 2009/01/21 16:26:24 number6 Exp $";
+static char SccsId[] = "$Id: mp3time.c,v 1.17 2009/02/04 07:45:49 number6 Exp $";
 #endif
 
 #include "portability.h"

@@ -9,5 +9,8 @@ example: example.o md5.o
 md5main: md5main.o md5.o
 	$(CC) $(LDFLAGS) -o md5main md5main.o md5.o
 
+distclean:
+	make -f makefile.linux clean
+
 clean:
-	rm -f example.o md5.o md5main.o
+	rm -f example.o md5.o md5main.o example

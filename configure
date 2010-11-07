@@ -16,3 +16,17 @@ fi
 
 ./make_alsa.sh
 ./unix_make.sh
+
+# Fixup version in install.sh
+if [ -f version.h -a ! -f .install.sh ]; then
+  if [ `grep -c '^MPGEDIT_VERSION' install.sh` -eq 0 ]; then
+    if [ $? -ne 0 ]; then
+      echo "ERROR: unable to rename install.sh"
+      exit 1
+    fi
+    . `dirname $0`/dist_parse_version.sh $0
+    ver="MPGEDIT_VERSION=${MAJOR}.${MINOR}_${RELTYPE}${CKPT}"
+    sed "2,2s|product=.*|&\n$ver|" install.sh > .install.sh
+    chmod +x .install.sh
+  fi
+fi

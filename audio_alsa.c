@@ -16,7 +16,12 @@
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API
 
+#ifdef ASOUNDLIB_H
 #include <alsa/asoundlib.h>
+#endif
+#ifdef ASOUND_H
+#include <sound/asound.h>
+#endif
 
 /* My laptop has probs playing low-sampled files with only 0.5s buffer... this should be a user setting -- ThOr */
 #define BUFFER_LENGTH 0.5	/* in seconds */

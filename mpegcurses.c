@@ -20,7 +20,7 @@
  */
 
 #ifndef lint
-static char SccsId[] = "$Id: mpegcurses.c,v 1.41 2005/11/30 07:34:23 number6 Exp $";
+static char SccsId[] = "$Id: mpegcurses.c,v 1.41.6.1 2009/04/02 03:14:02 number6 Exp $";
 #endif
 
 /*
@@ -1662,13 +1662,17 @@ int curs_get_abandoned_filename(input_fname *filename,
 char *curs_get_default_abandoned_filename(char *name)
 {
     FILE  *fp;
+    char *cp;
 
     fp = fopen(".mp3edit_abandonded_name", "rb");
     if (!fp) {
         return NULL;
     }
-    fgets(name, MAXPATHLEN, fp);
+    cp = fgets(name, MAXPATHLEN, fp);
     fclose(fp);
+    if (!cp) {
+        return NULL;
+    }
     return name;
 }
 

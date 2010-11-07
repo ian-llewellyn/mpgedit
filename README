@@ -1,5 +1,5 @@
      mpgedit - MPEG 1/2/2.5 (MP3) audio file editor
-               Version 0.74 beta1 January 25, 2009
+               Version 0.75 dev2 April 13, 2009
                    http://mpgedit.org
         Copyright (C) 2001-2009 by Adam Bernstein
 
@@ -53,21 +53,21 @@ As well as additional copyrights as documented in the source code.
 
 
 =========================================================================
-- Refer to NEWS file for 0.74beta1 beta release notes 
+- Refer to NEWS file for 0.75dev2 beta release notes 
 
-- For mpgedit_0-74beta1_src.exe source bundle, see the file 
+- For mpgedit_0-75dev2_src.exe source bundle, see the file 
   "INSTALL" for compilation and installation instructions.
 
-- For mpgedit_0-74beta1_linux.exe binary bundle, See the file 
+- For mpgedit_0-75dev2_linux.exe binary bundle, See the file 
   "README.linux" for installation instructions.
 
-- For mpgedit_0-74beta1_linux_rh7.exe binary bundle, See the file 
+- For mpgedit_0-75dev2_linux_rh7.exe binary bundle, See the file 
   "README.linux" for installation instructions.
 
 - Execute the native Windows installer for mpgedit or xmpgedit by running
-  setup_mpgedit_0-74beta1.exe or setup_xmpgedit_0-74beta1.exe respectively.
+  setup_mpgedit_0-75dev2.exe or setup_xmpgedit_0-75dev2.exe respectively.
 
-- For mpgedit_0-74beta1_win32.zip binary bundle, See the file "README.win32" 
+- For mpgedit_0-75dev2_win32.zip binary bundle, See the file "README.win32" 
   for installation instructions.
 
 Please report bugs to: number6@mpgedit.org

@@ -37,6 +37,28 @@ void mpeg_file_stats_init(mpeg_file_stats *s, char *filename,
 }
 
 
+void mpeg_file_stats_join(mpeg_file_stats *global_stats, mpeg_file_stats *stat_entry)
+{
+    int i;
+    global_stats->num_frames += stat_entry->num_frames;
+
+    if (stat_entry->max_bitrate > global_stats->max_bitrate) {
+        global_stats->max_bitrate = stat_entry->max_bitrate;
+    }
+
+    if (stat_entry->min_bitrate < global_stats->min_bitrate) {
+        global_stats->min_bitrate = stat_entry->min_bitrate;
+    }
+
+    global_stats->avg_bitrate += stat_entry->avg_bitrate;
+    global_stats->file_size += stat_entry->file_size;
+                               
+    for (i=0; i<16; i++) {
+        global_stats->bitrate_frame_cnt[i] += stat_entry->bitrate_frame_cnt[i];
+    }
+}
+
+
 void mpeg_file_stats_gather(mpeg_file_stats *stats, mpeg_header_data *header)
 {
     stats->num_frames++;
@@ -125,4 +147,13 @@ void mpeg_file_stats2str(mpeg_file_stats *stats,
         }
     }
     cp += sprintf(cp, "\n\n");
+}
+
+
+int mpeg_file_stats_is_vbr(mpeg_file_stats *stats)
+{
+    if (!stats) {
+        return -1;
+    }
+    return stats->max_bitrate != stats->min_bitrate;
 }

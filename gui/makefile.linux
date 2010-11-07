@@ -74,8 +74,12 @@ ledtime: ledtime_main.o playctrl.o
 	$(CC) $(LDFLAGS) -o ledtime ledtime_main.o playctrl.o\
               -L../ -lmpgeditlib $(LDLIBS) $(EFENCE)
 
+distclean:
+	$(RM) xmpgedit_installer.iss credits.h
+	make -f makefile.linux clean
+
 clean:
-	$(RM) -f $(PLAY_OBJS) $(XMPGEDIT_OBJS) spinner.o xmpgedit \
+	$(RM)    $(PLAY_OBJS) $(XMPGEDIT_OBJS) spinner.o xmpgedit \
                  volume spinner editor volume_main.o swindow.o swindow2.o \
                  pcmview_main.o editor_main.o  spinner2.o icon.o \
                  ledtime_main.o playctrl_main.o  spixmap.o  \

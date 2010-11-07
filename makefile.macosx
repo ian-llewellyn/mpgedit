@@ -61,14 +61,14 @@ uninstall:
 
 mpgeditlib_objs = editif.o playif.o volumeif.o plugin_unix.o \
                   decoder.o mpegfio.o header.o xing_header.o \
-                  mpegindx.o mp3time.o mpegstat.o pcmlevel.o \
+                  xingedit.o mpegindx.o mp3time.o mpegstat.o pcmlevel.o \
                   segment.o md5lib/md5.o
 
 mp3_header_objs = mp3_header.o wav16.o
 
-mp3_time_objs   = mp3_time.o mp3time.o header.o mpegfio.o xing_header.o
+mp3_time_objs   = mp3_time.o $(mpgeditlib_objs)
 
-vbr_objs        = vbr_patch.o xing_header.o mpegfio.o header.o
+vbr_objs        = vbr_patch.o $(mpgeditlib_objs)
 
 mpeg_indx_objs  = mpeg_indx.o mpegindx.o mpegfio.o header.o \
                   mp3time.o xing_header.o editif.o mpegstat.o
@@ -76,9 +76,7 @@ mpeg_indx_objs  = mpeg_indx.o mpegindx.o mpegfio.o header.o \
 curses_obj      = mpegcurses.o mpgsleep.o cursutil.o parsename.o
 nocurses_obj    = cursesstub.o
 
-editif_objs     = editif_test.o editif.o mp3time.o mpegfio.o \
-                  mpegindx.o xing_header.o header.o mpegstat.o \
-                  md5lib/md5.o
+editif_objs     = editif_test.o $(mpgeditlib_objs)
 
 libmpgeditlib.a: $(mpgeditlib_objs)
 	ar ruv libmpgeditlib.a $(mpgeditlib_objs)
@@ -118,13 +116,13 @@ tstheader: tstheader.o header.o
 	$(CC) -o $@ tstheader.o header.o
 
 mp3_time: $(mp3_time_objs)
-	$(CC) -o $@ $(mp3_time_objs)
+	$(CC) -o $@ $(mp3_time_objs) -ldl
 
 mp3_vbrpatch: $(vbr_objs)
 	$(CC) -o $@ $(vbr_objs)
 
 editif_test: $(editif_objs)
-	$(CC) -o $@ $(editif_objs) $(EFENCE)
+	$(CC) -o $@ $(editif_objs) $(EFENCE) -ldl
 
 #mpeg_indx: $(mpeg_indx_objs)
 #	$(CC) -o $@ $(mpeg_indx_objs)
@@ -227,7 +225,8 @@ clean: subdirs_clean installer_clean
         editif_test.o editif_test play tsize play.o tsize.o \
         libmpgedit.dylib libmpgeditlib.a $(mpgeditlib_objs) \
         mpgedit_pkg.dmg xmpgedit_0-73dev1.dmg mpgedit_pkg_0-73dev1.dmg \
-        xmpgedit_gtk_pkg.dmg xmpgedit.dmg xmpgedit_gtk_pkg_0-73dev1.dmg
+        xmpgedit_gtk_pkg.dmg xmpgedit.dmg xmpgedit_gtk_pkg_0-73dev1.dmg \
+        .install.sh
 
 
 cursesstub.c:mp3time.h mp3_header.h mpegcurses.h

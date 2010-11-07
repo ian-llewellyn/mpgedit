@@ -1,5 +1,5 @@
      mpgedit - MPEG 1/2/2.5 (MP3) audio file editor
-               Version 0.74beta1 January 2009
+               Version 0.75dev2 April 2009
                      http://mpgedit.org
         Copyright (C) 2001-2009 by Adam Bernstein
 
@@ -13,11 +13,11 @@ the GPL.  See "COPYING" for full details.
 BACKGROUND
 ----------
 This is the Windows installation package of xmpgedit, the graphical version
-of mpgedit. This is release 0.12beta1.  Don't let the low version number
+of mpgedit. This is release 0.13dev2.  Don't let the low version number
 worry you.  There has been quite a bit of development work that has resulted
 in this release.  The GUI portion of this project is the newest component of
 this project. However the underlying MP3 editing library is at version
-0.74beta, which has been in production for over 3 years.
+0.75dev, which has been in production for over 3 years.
 
 The major feature of this release is the graphic display of decoded mp3 volume levels,
 giving the ability to select edit times from the audio levels display.
@@ -70,7 +70,7 @@ cvs -d \
 
 cvs -z3 -d \
   :pserver:anonymous@mpgedit.org:/usr/local/cvsroot \
-  co -r mpgedit_0-74_beta1 mpgedit
+  co -r mpgedit_0-75_dev2 mpgedit
 
 
 
@@ -81,7 +81,7 @@ You must have Visual C++ configured for command line builds.  The
 easiest way to accomplish this is run vcvars32.bat from a cmd shell.
 
 Download the source:
-    http://mpgedit.org/mpgedit/mpgedit_0-74beta1_src.tar.gz
+    http://mpgedit.org/mpgedit/mpgedit_0-75dev2_src.tar.gz
 
 Or download the source from CVS for 'latest'.
 
@@ -132,7 +132,7 @@ home page:
 COPYRIGHT
 ---------
      mpgedit - MPEG 1/2/2.5 (MP3) audio file editor
-               Version 0.74beta1 January 2009
+               Version 0.75dev2 April 2009
                    http://mpgedit.org
         Copyright (C) 2001-2009 by Adam Bernstein
 

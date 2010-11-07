@@ -30,6 +30,7 @@
 #include "mp3time.h"
 #include "editif.h"
 #include "xing_header.h"
+#include "xingedit.h"
 #include "mpegfio.h"
 #include "mpegindx.h"
 #include "mpegstat.h"
@@ -83,6 +84,7 @@ static int mpegfio_edit_segment(void            *in_edctx,
     playctx          ctx_data;
     int              next_sec = 0;
     md5_state_t      md5state;
+    int              sts;
 
 
     if (!in_edctx) {
@@ -120,8 +122,12 @@ static int mpegfio_edit_segment(void            *in_edctx,
             mpeg_time_gettime(&ctx->stime, &sec, &usec);
 
             if (outfp) {
-                fwrite(mpeg_file_iobuf_getptr(&ctx->mpegiobuf),
-                       stats_header->frame_size, 1, outfp);
+                sts = fwrite(mpeg_file_iobuf_getptr(&ctx->mpegiobuf),
+                             stats_header->frame_size, 1, outfp);
+                if (sts != 1) {
+                    return -1;
+                } 
+
             }
 
 #if 0
@@ -647,39 +653,36 @@ long mpgedit_edit_sec(void *ctx)
 
 long mpgedit_edit_offset(void *ctx)
 {
-    if (!ctx) {
-        return -1;
-    }
-    return ((playctx *) ctx)->stats.file_size;
+    return ctx ? ((playctx *) ctx)->stats.file_size : -1;
 }
 
 
 mpeg_file_stats *mpgedit_edit_stats_ctx(void *ctx)
 {
-    return &((playctx *) ctx)->stats;
+    return ctx ? &((playctx *) ctx)->stats : NULL;
 }
 
 
 mpeg_time *mpgedit_edit_total_length_time(void *ctx)
 {
-    return &((playctx *) ctx)->mpegtval;
+    return ctx ? &((playctx *) ctx)->mpegtval : NULL;
 }
 
 mpeg_header_data *mpgedit_edit_frame_header(void *ctx)
 {
-    return &((playctx *) ctx)->stats_frame_header;
+    return ctx ? &((playctx *) ctx)->stats_frame_header : NULL;
 }
 
 
 void *mpgedit_edit_xing_header(void *ctx)
 {
-    return &((playctx *) ctx)->xingh;
+    return ctx ? &((playctx *) ctx)->xingh : NULL;
 }
 
 
 int mpgedit_edit_has_xing(void *ctx)
 {
-    return ((playctx *) ctx)->has_xing;
+    return ctx ? ((playctx *) ctx)->has_xing : -1;
 }
 
 
@@ -1028,10 +1031,11 @@ clean_exit:
 }
 
 
-mpgedit_t *mpgedit_edit_files_init(editspec_t *edarray,
-                                   char     *outfile,
-                                   unsigned int flags,
-                                   int      *rstatus)
+mpgedit_t *mpgedit_edit_files_init5(editspec_t      *edarray,
+                                    char            *outfile,
+                                    unsigned        int flags,
+                                    mpeg_file_stats *edit_stats,
+                                    int             *rstatus)
 {
     playctx          *ctx;
     int              append;
@@ -1046,6 +1050,7 @@ mpgedit_t *mpgedit_edit_files_init(editspec_t *edarray,
         *rstatus = MPGEDIT_EDIT_FILES_BAD_CONTEXT;
         return NULL;
     }
+    ctx->g_stats = edit_stats;
     append = flags & MPGEDIT_FLAGS_APPEND;
     ctx->do_md5sum = flags & MPGEDIT_FLAGS_MD5SUM_FRAME;
     if (ctx->state == MPGEDIT_STATE_INIT) {
@@ -1091,6 +1096,19 @@ clean_exit:
         ctx = NULL;
     }
     return (mpgedit_t *) ctx;
+}
+
+
+mpgedit_t *mpgedit_edit_files_init(editspec_t *edarray,
+                                   char     *outfile,
+                                   unsigned int flags,
+                                   int      *rstatus)
+
+{
+    mpeg_file_stats edit_stats;
+
+    memset(&edit_stats, 0, sizeof(edit_stats));
+    return mpgedit_edit_files_init5(edarray, outfile, flags, &edit_stats, rstatus);
 }
 
 
@@ -1213,7 +1231,8 @@ int mpgedit_edit_files(mpgedit_t *play_ctx, int *rstatus)
     long             usec;
     int              single_frame = 0;
     int              input_has_xing = 0;
-
+    char             *outfile = NULL;
+    FILE             **editfp = NULL;
 
     if (!play_ctx || !play_ctx->edarray || play_ctx->edarray->indx == 0) {
         *rstatus = MPGEDIT_EDIT_FILES_BAD_CONTEXT;
@@ -1253,6 +1272,7 @@ int mpgedit_edit_files(mpgedit_t *play_ctx, int *rstatus)
                 *rstatus = MPGEDIT_EDIT_FILES_ERR_INDEXFILE_ERR;
                 goto clean_exit;
             }
+
             rsts = mp3edit_get_size_from_index(ctx->indxfp, &sec, &usec);
             if (rsts != -1) {
                 ctx->fsize = rsts;
@@ -1263,6 +1283,8 @@ int mpgedit_edit_files(mpgedit_t *play_ctx, int *rstatus)
 
 
         if ((ctx->flags & MPGEDIT_FLAGS_NO_EDITS) == 0) {
+            ctx->outfile_exists = (access(ctx->outfile, F_OK) != -1);
+
             /*
              * Open edit file when a cut begin/end time are specified.
              * Edit file is opened for read/write, so the Xing VBR header
@@ -1307,8 +1329,7 @@ int mpgedit_edit_files(mpgedit_t *play_ctx, int *rstatus)
                 mpeg_file_stats_init(
                     &ctx->stats,
                     ctx->edarray->body[ctx->editsindx].filename,
-                    ctx->xingh.bytes,
-                    ctx->xingh.frames);
+                    ctx->outfile_exists ? 0 : ctx->has_xing, 0);
             }
             /* 
              * This is to skip xing header when one is already present on 
@@ -1329,14 +1350,15 @@ int mpgedit_edit_files(mpgedit_t *play_ctx, int *rstatus)
              */
             mpeg_file_stats_init(&ctx->stats,
                                  ctx->edarray->body[ctx->editsindx].filename,
-                                 ctx->has_xing,
-                                 0);
-        }
-        if (ctx->has_xing > 0) {
-            ctx->xing_present = 1;
+                                 ctx->outfile_exists ? 0 : ctx->has_xing, 0);
         }
 
-        if (ctx->xing_present) {
+        if (ctx->has_xing > 0) {
+            if (!ctx->g_stats->inited) {
+                mpeg_file_stats_init(ctx->g_stats, 0, ctx->has_xing, 0);
+                ctx->g_stats->inited = 1;
+            }
+
             /*
              * Never write Xing header prefix when appending output.
              * We are appending when editing after the first iteration,
@@ -1346,7 +1368,11 @@ int mpgedit_edit_files(mpgedit_t *play_ctx, int *rstatus)
                 (xing_flag == MPGEDIT_FLAGS_XING_DEFAULT ||
                  xing_flag == MPGEDIT_FLAGS_XING_FIXUP))
             {
-                fwrite(ctx->xingh.xingbuf, ctx->has_xing, 1, ctx->editfp);
+                status = fwrite(ctx->xingh.xingbuf,
+                                ctx->has_xing, 1, ctx->editfp);
+                if (status != 1) {
+                    return -1;
+                } 
             }
         }
         else {
@@ -1404,55 +1430,32 @@ int mpgedit_edit_files(mpgedit_t *play_ctx, int *rstatus)
         /* fall through to next state */
 
       case MPGEDIT_STATE_EDIT_DONE:
-        if (ctx->xing_present) {
-            if (ctx->editfp) {
-                if (xing_flag == MPGEDIT_FLAGS_XING_DEFAULT ||
-                    xing_flag == MPGEDIT_FLAGS_XING_FIXUP)
-                {
-                        xingheader_edit(&ctx->xingh,
-                                        ctx->stats.num_frames,
-                                        ctx->stats.file_size, 
-                                        ctx->header.mpeg_version,
-                                        ctx->header.channel_mode);
-                    fclose(ctx->editfp);
-                    ctx->editfp = fopen(ctx->outfile, "rb+");
-                    if (ctx->editfp) {
-                        fwrite(ctx->xingh.xingbuf, ctx->has_xing,
-                               1, ctx->editfp);
-                        /*
-                         * This fflush should not be needed here.  Testing
-                         * on Linux, with glibc-2.1.3-15, this write is
-                         * not always being flushed by the fclose.  Must
-                         * be a glibc bug.
-                         */
-                        fflush(ctx->editfp);
-                        fseek(ctx->editfp, 0, SEEK_END);
-                    }
-                }
+        mpeg_file_stats_join(ctx->g_stats, &ctx->stats);
+        if (ctx->has_xing > 0) {
+            if (ctx->editfp && 
+                (xing_flag == MPGEDIT_FLAGS_XING_DEFAULT ||
+                 xing_flag == MPGEDIT_FLAGS_XING_FIXUP))
+            {
+                outfile    = ctx->outfile;
+                editfp     = &ctx->editfp;
             }
             else if (xing_flag == MPGEDIT_FLAGS_XING_FIXUP) {
 /*
  * This is pretty bad.  This violates the rule of the source file is never
  * modified.
  */
-                xingheader_edit(&ctx->xingh, ctx->stats.num_frames,
-                                ctx->stats.file_size,
-                                ctx->header.mpeg_version,
-                                ctx->header.channel_mode);
-                fclose(ctx->mpegfp);
-                ctx->mpegfp =
-                    fopen(ctx->edarray->body[ctx->editsindx].filename, "rb+");
-                if (ctx->mpegfp) {
-                    fwrite(ctx->xingh.xingbuf, ctx->has_xing,
-                           1, ctx->mpegfp);
-                    /*
-                     * This fflush should not be needed here.  Testing
-                     * on Linux, with glibc-2.1.3-15, this write is
-                     * not always being flushed by the fclose.  Must
-                     * be a glibc bug.
-                     */
-                    fflush(ctx->mpegfp);
-                    fseek(ctx->mpegfp, 0, SEEK_END);
+                outfile    = ctx->edarray->body[ctx->editsindx].filename;
+                editfp     = &ctx->mpegfp;
+            }
+
+            if (editfp && outfile) {
+                fclose(*editfp);
+                *editfp = fopen(outfile, "rb+");
+                if (*editfp) {
+                    mpgedit_xing_stats_modify_fp(
+                        *editfp, &ctx->stats,
+                        ctx->outfile_exists ? MPGEDIT_XING_MODIFY_INCR :
+                                              MPGEDIT_XING_MODIFY_SET);
                 }
             }
         }
@@ -1478,11 +1481,20 @@ int mpgedit_edit_files(mpgedit_t *play_ctx, int *rstatus)
         ctx->state = MPGEDIT_STATE_EDIT_INIT;
     } /*switch */
     } while (ctx->editsindx < ctx->edlen);
-
+    
     if (ctx->editfp) {
         fclose(ctx->editfp);
         ctx->editfp = NULL;
-        
+    }
+
+    /*
+     * Set Xing/Info header based on 
+     * edited file maximum/minimum bitrate
+     */
+    if (ctx->has_xing) {
+        ctx->g_stats->file_size = 0;
+        ctx->g_stats->num_frames = 0;
+        mpgedit_xing_stats_modify_file(ctx->outfile, ctx->g_stats, MPGEDIT_XING_MODIFY_INCR);
     }
     
     ctx = NULL;

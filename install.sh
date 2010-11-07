@@ -1,6 +1,17 @@
 #!/bin/sh
 product=mpgedit_0.7p2
 install_root=/usr/local
+modinstall="`dirname $0`/.install.sh"
+if [ -f "$modinstall" ]; then
+  if [ `basename $0` = install.sh ]; then
+    exec $modinstall $@
+    exit 0
+  fi
+fi
+
+if [ -n "$MPGEDIT_VERSION" ]; then
+  product="$MPGEDIT_VERSION"
+fi
 
 man1="mpgedit.1 xmpgedit.1 decoder.so.1 mp3decoder.sh.1
       scramble_times.pl.1 scramble.pl.1 unscramble.pl.1"
@@ -58,7 +69,8 @@ do_man_config()
       if [ $count -eq 0 ]; then
         echo "MANPATH	$man_root" >> "/etc/man.config"
         echo 'Calling makewhatis, this may take some time...'
-        makewhatis
+        echo makewhatis $man_root
+        makewhatis $man_root
         echo 'done.'
       fi
     fi
@@ -245,8 +257,8 @@ do_uninstall()
     # Don't use rm -rf on these, because if they really  are 
     # directories, you may really not mean to delete them.
     #
-    rm -f "/usr/share/pixmaps/xmpgedit"
-    rm -f "/usr/local/share/xmpgedit"
+    [ -L /usr/share/pixmaps/xmpgedit ] && rm -f "/usr/share/pixmaps/xmpgedit"
+    [ -L /usr/local/share/xmpgedit ] && rm -f "/usr/local/share/xmpgedit"
     for i in $share; do
       if [ -f $install_root/share/xmpgedit/$i ]; then
        echo "rm -f $install_root/share/xmpgedit/$i"
@@ -313,8 +325,7 @@ do_usage()
 #
 # ============================ main =======================
 #
-uid=`id | sed -e 's/uid=\([0-9][0-9]*\).*/\1/'`
-if [ $uid != 0 ]; then
+if [ `id -u` -ne 0 ]; then
   echo "ERROR: Can only install '$product' as root"
   exit 1;
 fi

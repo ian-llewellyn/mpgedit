@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=xmpgedit
-AppVerName=xmpgedit 0.12beta1
+AppVerName=xmpgedit 0.13dev2
 AppPublisher=mpgedit.org
 AppPublisherURL=http://mpgedit.org/mpgedit/
 AppSupportURL=http://mpgedit.org/mpgedit/

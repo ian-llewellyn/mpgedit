@@ -21,7 +21,7 @@
 
 
 #ifndef lint
-static char SccsId[] = "$Id: mp3_header.c,v 1.75.2.4 2009/01/21 16:26:23 number6 Exp $";
+static char SccsId[] = "$Id: mp3_header.c,v 1.76.2.2 2009/04/02 03:14:02 number6 Exp $";
 #endif
 
 #include <ctype.h>
@@ -1190,7 +1190,8 @@ void _mpgedit_decode_file(char *fname,
         go = mpgedit_play_decode_frame(
                  play_ctx, &pcmbuf, &pcmlen, &bsbytes);
         if (go && argvflags->Ds_flag) {
-            fwrite(pcmbuf, pcmlen, 1, stdout);
+            int sts;
+            sts = fwrite(pcmbuf, pcmlen, 1, stdout);
         }
     } while (go);
 
@@ -1358,6 +1359,7 @@ int main(int argc, char *argv[])
     char             *cp;
     long             tprev = 0;
     mpeg_file_stats  indx_stats;
+    mpeg_file_stats  edit_stats;
     int              once = 0;
     int              indx;
     int              no_edits_msg = 0;
@@ -1860,6 +1862,7 @@ int main(int argc, char *argv[])
         memset(&seekcb_ctx, 0, sizeof(seekcb_ctx));
     }
 
+    memset(&edit_stats, 0, sizeof(edit_stats));
     do {
 #if 1
         next_editspec = mpgedit_editspec_get_edit(
@@ -1927,9 +1930,10 @@ int main(int argc, char *argv[])
             {
                 printf("Writing edits to file '%s'\n", edit_outfilename);
             }
-            edit_ctx = mpgedit_edit_files_init(next_editspec,
+            edit_ctx = mpgedit_edit_files_init5(next_editspec,
                                                edit_outfilename,
                                                edit_flags,
+                                               &edit_stats,
                                                &rsts);
             if (argvflags.I_flag && !argvflags.s_flag) {
                 seekcb_ctx.ctx = edit_ctx;

@@ -38,6 +38,7 @@
  * setting the volume by calling set_control_details() is really easy.
  * 
  * This web site was extremely valuable to me when writing this code:
+ *   http://web.archive.org/web/20080126084138/http://www.borg.com/~jglatt/tech/mixer.htm
  *   http://www.borg.com/~jglatt/tech/mixer.htm
  *
  */

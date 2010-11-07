@@ -21,7 +21,7 @@
  */
 
 #ifndef lint
-static char SccsId[] = "$Id: decoder.c,v 1.13 2005/11/19 18:30:38 number6 Exp $";
+static char SccsId[] = "$Id: decoder.c,v 1.13.6.1 2009/04/02 03:14:02 number6 Exp $";
 #endif
 
 #include <stdio.h>
@@ -100,6 +100,7 @@ _STATIC void mpgdecoder_play_frame(void          *ctx,
 {
     FILE *fp;
     mpgdecoder_ctx *mpctx;
+    int sts;
 
     if (!ctx) {
         return;
@@ -107,7 +108,10 @@ _STATIC void mpgdecoder_play_frame(void          *ctx,
     mpctx = (mpgdecoder_ctx *) ctx;
     fp = (FILE *) mpctx->g_dspctx;
     if (fp) {
-        fwrite(buf, len, 1, fp);
+        sts = fwrite(buf, len, 1, fp);
+        if (sts != 1) {
+            return;
+        }
     }
 }
 

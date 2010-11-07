@@ -20,7 +20,7 @@
  */
 
 /*
- * SccsId[] = "$Id: xing_header.h,v 1.9 2004/11/27 21:13:29 number6 Exp $"
+ * SccsId[] = "$Id: xing_header.h,v 1.9.6.1 2009/03/14 07:56:26 number6 Exp $"
  */
 
 #ifndef _XING_HEADER_H_
@@ -33,6 +33,8 @@
 #define VBR_SCALE_FLAG  0x0008
 
 #include "portability.h"
+#include "mpegstat.h"
+
 #define XING_HEADER_FILE "xingheader.mp3"
 
 #define FRAMES_AND_BYTES (FRAMES_FLAG | BYTES_FLAG)
@@ -75,6 +77,8 @@ typedef struct {
       */
      unsigned char xingbuf[2048];
      int           xingbuflen;
+     int           xing_info_header; /* Set to 1 if CBR "Info" header is found */
+     void          *play_ctx;
 }  XHEADDATA;
 
 void InsertI4(int x, unsigned char *buf);
@@ -98,6 +102,19 @@ void xingheader_edit(XHEADDATA *xingh,
                      int frames, int bytes, int version, int mode);
 int  xingheader_init(unsigned char *buf, int len, XHEADDATA *X);
 int  xingheader_parse(XHEADDATA *xingh);
+int  xingheader_init_mpgedit_ctx(XHEADDATA *xingh, void *ctx);
 _DSOEXPORT void _CDECL xingheader2str(XHEADDATA *xingh, char *cp);
+
+void edit_xing_header(int frames, int bytes,
+                      unsigned char *buf, int len,
+                      int version, int mode, int is_vbr);
+
+
+_DSOEXPORT void _CDECL xingheader_stats_edit(XHEADDATA *xingh,
+                           mpeg_file_stats *stats,
+                           int frames,
+                           int bytes,
+                           int id,
+                           int mode);
 
 #endif

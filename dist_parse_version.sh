@@ -27,7 +27,7 @@
 parse_version()
 {
 export PATH=$PATH:/opt/bin
-scriptdir=`dirname $0`
+scriptdir=`dirname $1`
 pwd=`pwd`
 cd $scriptdir
 scriptdir=`pwd`
@@ -114,4 +114,8 @@ fi
 #echo RELEASE=$RELEASE
 }
 
-parse_version $0
+if [ -n "$1" ]; then
+  parse_version $1
+else
+  parse_version $0
+fi

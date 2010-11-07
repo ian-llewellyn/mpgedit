@@ -20,7 +20,7 @@
  */
 
 #ifndef lint
-static char SccsId[] = "$Id: mpegindx.c,v 1.12.2.2 2006/12/27 21:37:56 number6 Exp $";
+static char SccsId[] = "$Id: mpegindx.c,v 1.13.2.1 2009/04/02 03:14:02 number6 Exp $";
 #endif
 
 #include <stdio.h>
@@ -174,6 +174,7 @@ int mp3edit_create_indexfile(void *ifctx)
     int              eof = 0;
     int              tlast = 0;
     int              indx;
+    int              sts = 0;
 
     memset(&header, 0, sizeof(header));
 
@@ -183,16 +184,25 @@ int mp3edit_create_indexfile(void *ifctx)
          * Write header version into index file
          */
         writeint = ~0;
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
         InsertI4(MP3EDIT_INDEX_FILE_VERSION3, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
 
         /*
          * Write index header placeholder information
          */
         writeint = 0;
         for (indx = 0; indx<25; indx++) {
-            fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+            sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+            if (sts != 1) {
+                goto error;
+            }
         }
 
         /*
@@ -206,8 +216,14 @@ int mp3edit_create_indexfile(void *ifctx)
              */
             ctx->inited = 1;
             writeint    = 0;
-            fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
-            fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+            sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+            if (sts != 1) {
+                goto error;
+            }
+            sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+            if (sts != 1) {
+                goto error;
+            }
 
             /*
              *  Increment statistics file position to include Xing header.
@@ -236,18 +252,30 @@ int mp3edit_create_indexfile(void *ifctx)
                  * residual as well.
                  */
                 InsertI4(ctx->file_position, (unsigned char *) &writeint);
-                fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+                sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+                if (sts != 1) {
+                    goto error;
+                }
                 writeint = 0;
-                fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+                sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+                if (sts != 1) {
+                    goto error;
+                }
             }
             ctx->file_position += header.frame_size;
             
             if (ctx->tnow > ctx->tlast) {
                 ctx->tlast = tlast = ctx->tnow;
                 InsertI4(ctx->file_position, (unsigned char *) &writeint);
-                fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+                sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+                if (sts != 1) {
+                    goto error;
+                }
                 InsertI4(ctx->mpegtval.usec, (unsigned char *) &writeint);
-                fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+                sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+                if (sts != 1) {
+                    goto error;
+                }
             }
             mpeg_file_iobuf_setstart(&ctx->mpegiobuf,
                                     mpeg_file_iobuf_getstart(&ctx->mpegiobuf) +
@@ -263,9 +291,15 @@ int mp3edit_create_indexfile(void *ifctx)
          */
         ctx->file_position = ftell(ctx->mpegfp);
         InsertI4(ctx->file_position, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
         InsertI4(ctx->mpegtval.usec | 1U<<31, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
 
         /*
          * Write index header information
@@ -274,46 +308,80 @@ int mp3edit_create_indexfile(void *ifctx)
     
         /* | min_bitrate | */
         InsertI4(ctx->stats.min_bitrate, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         /* | max_bitrate | */
         InsertI4(ctx->stats.max_bitrate, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         /* | avg_bitrate | */
         InsertI4(ctx->stats.avg_bitrate, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         /* | file_size | */
         InsertI4(ctx->stats.file_size, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         /* | num_frames | */
         InsertI4(ctx->stats.num_frames, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         /* | len_sec | */
         InsertI4(ctx->mpegtval.units, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         /* | len_mec | */
         InsertI4(ctx->mpegtval.usec, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         /* |mpeg_version_index| */
         InsertI4(ctx->stats.mpeg_version_index, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         /* |mpeg_layer| */
         InsertI4(ctx->stats.mpeg_layer, (unsigned char *) &writeint);
-        fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+        if (sts != 1) {
+            goto error;
+        }
     
         for (indx=0; indx<16; indx++) {
             InsertI4(ctx->stats.bitrate_frame_cnt[indx],
                      (unsigned char *) &writeint);
-            fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+            sts = fwrite(&writeint, sizeof(writeint), 1, ctx->indxfp);
+            if (sts != 1) {
+                goto error;
+            }
         }
         fseek(ctx->indxfp, 0, SEEK_END);
+    }
+error:
+    if (sts != 1) {
+        return -1;
     }
     
     return eof;
@@ -355,43 +423,73 @@ int mp3edit_indexfile_get_stats(void *ifctx)
     }
 
     /* | min_bitrate | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->stats.min_bitrate = ExtractI4((unsigned char *) &readint);
     
     /* | max_bitrate | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->stats.max_bitrate = ExtractI4((unsigned char *) &readint);
 
     /* | avg_bitrate | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->stats.avg_bitrate = ExtractI4((unsigned char *) &readint);
 
     /* | file_size | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->stats.file_size = ExtractI4((unsigned char *) &readint);
 
     /* | num_frames | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->stats.num_frames = ExtractI4((unsigned char *) &readint);
 
     /* | len_sec | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->mpegtval.units = ExtractI4((unsigned char *) &readint);
 
     /* | len_mec | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->mpegtval.usec = ExtractI4((unsigned char *) &readint);
 
     /* | mpeg_version_index | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->stats.mpeg_version_index = ExtractI4((unsigned char *) &readint);
 
     /* | mpeg_layer | */
-    fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+    if (sts != 1) {
+        return -1;
+    }
     ctx->stats.mpeg_layer = ExtractI4((unsigned char *) &readint);
 
     for (indx=0; indx<16; indx++) {
-        fread(&readint, sizeof(readint), 1, ctx->indxfp);
+        sts = fread(&readint, sizeof(readint), 1, ctx->indxfp);
+        if (sts != 1) {
+            return -1;
+        }
         ctx->stats.bitrate_frame_cnt[indx] =
             ExtractI4((unsigned char *) &readint);
     }

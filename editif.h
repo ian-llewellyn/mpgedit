@@ -80,6 +80,13 @@ _DSOEXPORT mpgedit_t * _CDECL mpgedit_edit_files_init(
                                    unsigned int flags,
                                    int      *rstatus);
 
+_DSOEXPORT mpgedit_t * _CDECL mpgedit_edit_files_init5(
+                                   editspec_t      *edarray,
+                                   char            *outfile,
+                                   unsigned int    flags,
+                                   mpeg_file_stats *edit_stats,
+                                   int             *rstatus);
+
 _DSOEXPORT void  _CDECL mpgedit_edit_files_free(void *editctx);
 _DSOEXPORT void  _CDECL mpgedit_free(void *ptr);
 

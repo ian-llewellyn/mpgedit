@@ -238,6 +238,7 @@ char *___get_default_abandoned_filename(char *name)
 {
     FILE  *fp;
     char *rname;
+    char *cp;
 
     if (name) {
         rname = name;
@@ -254,8 +255,11 @@ char *___get_default_abandoned_filename(char *name)
         strcpy(rname, DEFAULT_ABANDONED_FILENAME);
     }
     else {
-        fgets(rname, MAXPATHLEN, fp);
+        cp = fgets(rname, MAXPATHLEN, fp);
         fclose(fp);
+        if (!cp) {
+            return NULL;
+        }
     }
     return rname;
 }

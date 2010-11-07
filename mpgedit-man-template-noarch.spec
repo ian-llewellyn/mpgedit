@@ -81,7 +81,7 @@ rm -rf $RPM_BUILD_ROOT
 %post
 count=`grep "^MANPATH.*/usr/share/man" "/etc/man.config" | wc -l`
 [ $count -eq 0 ] && echo "MANPATH       /usr/share/man" >> /etc/man.config
-env PATH=$PATH:/usr/sbin:/usr/bin makewhatis
+env PATH=$PATH:/usr/sbin:/usr/bin makewhatis /usr/share/man/man1
 
 
 %changelog

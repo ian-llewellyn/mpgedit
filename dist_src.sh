@@ -12,6 +12,11 @@ if [ -z "$RELEASE" -o -z "$TAG" ]; then
   . `dirname $0`/dist_parse_version.sh $0
 fi
 
+if [ -L mpgedit_${RELEASE}_src.tgz -a -L mpgedit_${RELEASE}_src.exe ]; then
+  echo "$0 Source packages already exist"
+  exit 0
+fi
+
 project_dir="mpgedit_${RELEASE}_src"
 dir=../..
 if [ -d $dir/$project_dir ]; then

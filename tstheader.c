@@ -21,7 +21,7 @@
 
 
 #ifndef lint
-static char SccsId[] = "$Id: tstheader.c,v 1.5 2005/06/11 18:53:09 number6 Exp $";
+static char SccsId[] = "$Id: tstheader.c,v 1.5.6.1 2009/04/02 03:14:02 number6 Exp $";
 #endif
 
 #include "header.h"
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     memset(&header, 0, sizeof(header));
     if (decode_mpeg_header(buf, &header, MPGEDIT_ALLOW_MPEG1L1)) {
         mpeg_header_values2str(&header, str);
-        printf(str);
+        printf("%s", str);
     }
     free(str);
     return 0;

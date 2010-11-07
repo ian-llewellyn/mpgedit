@@ -21,7 +21,7 @@
 
 
 #ifndef lint
-static char SccsId[] = "$Id: vbr_patch.c,v 1.5 2005/11/27 06:40:32 number6 Exp $";
+static char SccsId[] = "$Id: vbr_patch.c,v 1.5.6.1 2009/04/02 03:14:02 number6 Exp $";
 #endif
 
 #include <stdio.h>
@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     char          *cp;
     char          *str;
     mpeg_header_data mpeg_header;
+    int           sts;
 
     memset(&X, 0, sizeof(X));
 
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
             printf("%s", str);
             printf("==================================\n");
             fseek(fp, 0, SEEK_SET);
-            fwrite(X.xingbuf, header_size, 1, fp);
+            sts = fwrite(X.xingbuf, header_size, 1, fp);
         }
         else {
             printf("Did not find Xing header\n");

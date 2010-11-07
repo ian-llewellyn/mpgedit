@@ -7,3 +7,9 @@ install:
 
 clean:
 	python ./setup_pympgedit.py clean
+
+distclean:
+	$(RM)	ANNOUNCEMENT.txt LICENSE.txt py_mpgedit.htm \
+		py_mpgedit_license.htm
+	$(RM) -r build
+	make -f makefile.linux clean

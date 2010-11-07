@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 
     time(&t);
     tm_time = localtime(&t);
-    printf("#define MPGEDIT_BUILDNUM \"%d-%d-%02d%02d\"\n", 
+    printf("#define MPGEDIT_BUILDNUM \"%d-%03d-%02d%02d\"\n", 
            tm_time->tm_year + 1900,
            tm_time->tm_yday + 1, /* Jan 1 is 0, 366 on Dec 31 on leap year */
            tm_time->tm_hour,

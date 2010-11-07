@@ -22,8 +22,8 @@ RM           = del /f
 mpgeditlib_objs = decoder_win32.obj editif.obj header.obj \
                   mp3time.obj mpegfio.obj mpegindx.obj mpegstat.obj   \
                   pcmlevel.obj \
-                  playif.obj plugin_unix.obj \
-                  xing_header.obj segment.obj md5lib\md5.obj
+                  playif.obj plugin_unix.obj xing_header.obj \
+                  xingedit.obj segment.obj md5lib\md5.obj
 
 MPGEDIT_OBJS = getopt.obj mp3_header.obj wav16.obj
 
@@ -31,7 +31,7 @@ PLUGIN_OBJS  = decoder_mpg123.obj audio.obj volumeif.obj wmixer.obj
 
 PLUGIN_MAD_OBJS  = decoder_mad.obj audio.obj volumeif.obj wmixer.obj
 
-vbr_objs     = vbr_patch.obj xing_header.obj mpegfio.obj header.obj
+vbr_objs     = vbr_patch.obj $(mpgeditlib_objs)
 
 NOCURSES     = cursesstub.obj
 
@@ -89,7 +89,7 @@ listlevels.exe: listlevels.obj getopt.obj
              listlevels.obj getopt.obj mpgedit.lib
 
 mp3_vbrpatch.exe: $(vbr_objs)
-        $(CC) -o $@ $(vbr_objs)
+        $(CC) -o $@ $(vbr_objs) winmm.lib
 
 mpgedit.dll: $(mpgeditlib_objs)
 	link $(LDFLAGS) $(LDDEBUGFLAGS) /DLL -out:mpgedit.dll \

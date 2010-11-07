@@ -34,7 +34,9 @@ static GtkWidget *_ledtime_lookup_digit(mpgedit_ledtime_t *self, char digit)
 
     if (isdigit(digit)) {
         i = digit - '0';
-        widget = self->digits[i];
+        if (i >= 0 && i <= 9) {
+            widget = self->digits[i];
+        }
     }
     else if (digit == ':') {
         widget = self->colon;

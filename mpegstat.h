@@ -37,7 +37,10 @@ typedef struct _mpeg_file_stats
     long bitrate_frame_cnt[16];
     int mpeg_version_index;
     int mpeg_layer;
+    int inited;
 } mpeg_file_stats;
+
+int mpeg_file_stats_is_vbr(mpeg_file_stats *stats);
 
 void mpeg_file_stats_init(mpeg_file_stats *s,
                           char *filename,
@@ -46,6 +49,11 @@ void mpeg_file_stats_init(mpeg_file_stats *s,
 
 void mpeg_file_stats_gather(mpeg_file_stats *stats,
                             mpeg_header_data *header);
+
 _DSOEXPORT void _CDECL mpeg_file_stats2str(mpeg_file_stats *stats,
                                            mpeg_time *time, char *str);
+
+_DSOEXPORT void _CDECL mpeg_file_stats_join(mpeg_file_stats *global_stats,
+                                            mpeg_file_stats *stat_entry);
+
 #endif

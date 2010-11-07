@@ -83,9 +83,9 @@ struct _playctx
     enum mpgedit_edit_files_states state;
     int              editsindx;
     FILE             *editfp;
-    int              xing_present;
     int              has_xing;
     mpeg_file_stats  stats;
+    mpeg_file_stats  *g_stats;
     XHEADDATA        xingh;
 
     /* Command line arguments from mpgedit_edit_files () */
@@ -93,6 +93,7 @@ struct _playctx
     int              edlen;
     char             *outfile;
     unsigned int     flags;
+    unsigned int     outfile_exists;
 
     /* 
      * seeked is set when mpgedit_play_seek_time() has been called.  Tells

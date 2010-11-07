@@ -6,7 +6,7 @@
 # libmad - MPEG audio decoder library
 # Copyright (C) 2000-2004 Underbit Technologies, Inc.
 #
-CFLAGS = -DHAVE_CONFIG_H -I. -I../src -DFPM_PPC -Wall -O -fforce-mem \
+CFLAGS = -DHAVE_CONFIG_H -I. -I../src -DFPM_PPC -Wall -O \
          -fforce-addr -fthread-jumps -fcse-follow-jumps -fcse-skip-blocks \
          -fexpensive-optimizations -fregmove -fschedule-insns2 \
          -fno-common -DPIC -c

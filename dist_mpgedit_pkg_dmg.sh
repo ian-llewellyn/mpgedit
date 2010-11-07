@@ -23,6 +23,16 @@ if [ $? -ne 0 ]; then
   echo "ERROR: cd gui directory failed"
   exit 1
 fi
+
+# Eject any mounted xmpgedit install images...
+#
+if [ `mount | grep -c /Volumes/mpgeditinstall` -gt 0 ]; then
+  mount_point=`mount | grep /Volumes/xmpgeditinstall | sed 's| .*||'`
+  for i in $mount_point; do
+    hdiutil eject $i
+  done
+fi
+
 rm -f $work_disk_image $tmp_disk_image
 
 

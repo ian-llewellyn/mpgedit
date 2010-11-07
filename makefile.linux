@@ -2,19 +2,19 @@
 #
 include alsa.def
 
-CFLAGS = -fPIC -Dlint -DSTDC_HEADERS -Wall $(ALSA_DEFINES) $(CDEBUGFLAGS) $(CFLAGS1) $(OSS_OPTIONS)
+CFLAGS = -fPIC -Dlint -DSTDC_HEADERS -Wall $(CDEBUGFLAGS) $(CFLAGS1) $(OSS_OPTIONS)
 
 CDEBUGFLAGS = -O3 
 CFLAGS1     = -Iinclude -Ilibmp3lame -Impglib $(INCLUDEMAD)
-INCLUDEMAD  = -Imad/include
 
 # Enable these for debugging and Electric Fence memory debugging
 # CDEBUGFLAGS = -g 
 # EFENCE      = -lefence
 LIBS        = -L. -lmpgeditlib -ldl
-LIBMAD      = -Lmad/linux -lmad
+#LIBMAD      = -Lmad/linux -lmad
+#INCLUDEMAD  = -Imad/include
 
-MPEGDECODER = -Lmpglib -lmpglib_mpgedit $(ALSA_LIB)
+MPEGDECODER = -Lmpglib -lmpglib_mpgedit
 MPEGDECODERSTATIC = -Lmpglib -lmpglib_static
 
 all: mkbuildnum libmpgeditlib.a libmpgedit.so subdirs mpgedit \
@@ -26,6 +26,9 @@ all: mkbuildnum libmpgeditlib.a libmpgedit.so subdirs mpgedit \
 source_package:
 	./dist_src.sh
 
+# Can't easily add target names for this rule, since the
+# targets are versioned.
+#
 rpm_package:
 	cat /etc/sudo_number6pwd | sudo -S -u root ./dist_rpm.sh 0
 
@@ -43,14 +46,15 @@ uninstall_sdk:
 
 mpgeditlib_objs = editif.o playif.o volumeif.o plugin_unix.o \
                   decoder.o mpegfio.o header.o xing_header.o \
-                  mpegindx.o mp3time.o mpegstat.o pcmlevel.o \
+                  xingedit.o mpegindx.o mp3time.o mpegstat.o pcmlevel.o \
                   segment.o md5lib/md5.o
 
 mp3_header_objs = mp3_header.o  wav16.o
 
-mp3_time_objs   = mp3_time.o mp3time.o header.o mpegfio.o xing_header.o
+mp3_time_objs   = mp3_time.o $(mpgeditlib_objs)
+#mp3time.o header.o mpegfio.o xing_header.o mpegstat.o editif.o
 
-vbr_objs        = vbr_patch.o xing_header.o mpegfio.o header.o
+vbr_objs        = vbr_patch.o $(mpgeditlib_objs)
 
 mpeg_indx_objs  = mpeg_indx.o mpegindx.o mpegfio.o header.o \
                   mp3time.o xing_header.o editif.o mpegstat.o
@@ -58,9 +62,7 @@ mpeg_indx_objs  = mpeg_indx.o mpegindx.o mpegfio.o header.o \
 curses_obj      = mpegcurses.o mpgsleep.o cursutil.o parsename.o
 nocurses_obj    = cursesstub.o
 
-editif_objs     = editif_test.o editif.o mp3time.o mpegfio.o \
-                  mpegindx.o xing_header.o header.o mpegstat.o \
-                  md5lib/md5.o
+editif_objs     = editif_test.o $(mpgeditlib_objs)
 
 libmpgeditlib.a: $(mpgeditlib_objs)
 	ar ruv libmpgeditlib.a $(mpgeditlib_objs)
@@ -86,7 +88,7 @@ python_dir:
 mkbuildnum: mkbuildnum.o
 	$(CC) -o $@ mkbuildnum.o
 
-mpgedit_buildnum.h:
+mpgedit_buildnum.h: mkbuildnum
 	./mkbuildnum Linux > mpgedit_buildnum.h
 
 mpgedit: $(mp3_header_objs) $(curses_obj) libmpgedit.so
@@ -111,13 +113,16 @@ readframes1: readframes1.o header.o
 	$(CC) -o $@ readframes1.o $(LIBS) $(LIBMAD)
 
 mp3_time: $(mp3_time_objs)
-	$(CC) -o $@ $(mp3_time_objs)
+	$(CC) -o $@ $(mp3_time_objs) -ldl
 
 mp3_vbrpatch: $(vbr_objs)
-	$(CC) -o $@ $(vbr_objs)
+	$(CC) -o $@ $(vbr_objs) -ldl
+
+vbrmodify: vbrmodify.o
+	$(CC) -o vbrmodify vbrmodify.o $(LIBS) -ldl
 
 editif_test: $(editif_objs)
-	$(CC) -o $@ $(editif_objs) $(EFENCE)
+	$(CC) -o $@ $(editif_objs) $(EFENCE) -ldl
 
 #mpeg_indx: $(mpeg_indx_objs)
 #	$(CC) -o $@ $(mpeg_indx_objs)
@@ -148,21 +153,32 @@ simple_play: simple_play.o  libmpgeditlib.a
 
 
 TSIZE_OBJS = tsize.o playif.o editif.o plugin_unix.o decoder.o mpegfio.o \
-             header.o xing_header.o mpegindx.o mp3time.o
+             header.o xing_header.o mpegstat.o mpegindx.o mp3time.o
 tsize: $(TSIZE_OBJS)
 	$(CC) -o $@ $(TSIZE_OBJS) -ldl
 
-ints: ints.o xing_header.o
-	$(CC) -o $@ ints.o xing_header.o
+ints: ints.o xing_header.o mpegstat.o
+	$(CC) -o $@ ints.o xing_header.o mpegstat.o
 
 listlevels: listlevels.o libmpgeditlib.a
 	$(CC) -o $@ listlevels.o -L. -lmpgeditlib
 
+audio.o: audio.c
+	$(CC) $(CFLAGS) $(ALSA_DEFINES) -c audio.c -o audio.o
+
+decoder_mpg123.o: decoder_mpg123.c
+	$(CC) $(CFLAGS) $(ALSA_DEFINES) -c decoder_mpg123.c -o decoder_mpg123.o
+
 libdecoder_mpg123.so: decoder_mpg123.o audio.o mpglib/libmpglib_mpgedit.so
-	$(CC) -fPIC -rdynamic -shared -o libdecoder_mpg123.so decoder_mpg123.o audio.o $(MPEGDECODER)
+	$(CC) -fPIC -rdynamic -shared $(ALSA_DEFINES) -o libdecoder_mpg123.so \
+	  decoder_mpg123.o audio.o $(MPEGDECODER) $(ALSA_LIB)
+
+decoder_mad.o: decoder_mad.c
+	$(CC) $(CFLAGS) $(ALSA_DEFINES) -c decoder_mad.c -o decoder_mad.o
 
 libdecoder_mad.so: decoder_mad.o audio.o mad/linux/libmad.a
-	$(CC) -fPIC -rdynamic -shared -o libdecoder_mad.so decoder_mad.o audio.o $(LIBMAD)
+	$(CC) -fPIC -rdynamic -shared $(ALSA_DEFINES) -o libdecoder_mad.so \
+	  decoder_mad.o audio.o $(LIBMAD) $(ALSA_LIB)
 
 install_shlibs:
 	[ -f libmpglib_mpgedit.so ] || rm -f libmpglib_mpgedit.so
@@ -172,6 +188,11 @@ install_shlibs:
 	-chmod -f +x mp3decoder.sh
 
 
+subdirs_distclean:
+	(cd md5lib;                       make -f makefile.linux distclean)
+	(cd gui;                          make -f makefile.linux distclean)
+	(cd contrib/python/py_mpgedit;    make -f makefile.linux distclean)
+
 subdirs_clean:
 	(cd md5lib; make -f makefile.linux clean)
 	(cd mad/linux; make -f makefile    clean)
@@ -180,7 +201,9 @@ subdirs_clean:
 	(cd contrib/python/py_mpgedit; make -f makefile.linux clean)
 
 
-audio.o:          audio_oss.c
+audio.o:          audio_aix.c audio_dummy.c audio_macosx.c audio_sun.c \
+		  audio_alsa.c  audio_hp.c     audio_oss.c
+
 version.h:        mpgedit_buildnum.h
 decoder.o:        decoder.h
 decoder_mpg123.o: mpglib/interface.h decoder.h audio.h portability.h
@@ -219,16 +242,26 @@ pcmlevel.o:       pcmlevel.h
 segment.o:        portability.h mpegindx.h xing_header.h pcmlevel.h \
                   mp3time.h segment.h
 
+distclean: subdirs_distclean
+	$(RM) .install.sh *.spec.orig *-[0-9]*.spec *.rpm \
+        mpgedit*.exe mpgedit*.tgz README README.txt README_SDK.linux \
+	README_SDK_win32.txt README_win32_mpgedit.txt \
+	README_win32_xmpgedit.txt mpgedit_installer.iss mpgedit_sdk.iss \
+	../../mpgedit_[0-9]-*_src.tgz ../../mpgedit_[0-9]-*_src.exe
+	$(RM) -r ../../mpgedit_[0-9]*_src
+	make clean 
+
 clean: subdirs_clean
-	rm -f mp3_time mpeg_indx tstheader mp3_vbrpatch $(mp3_header_objs) \
+	$(RM) mp3_time mpeg_indx tstheader mp3_vbrpatch $(mp3_header_objs) \
         mp3_time.o  mpeg_indx.o  tstheader.o  vbr_patch.o $(curses_obj)    \
         $(nocurses_obj) mpgedit mpgedit_nocurses libdecoder_popen.so \
         libdecoder_mpg123.so libdecoder_mad.so decoder.o decoder_mpg123.o \
-        decoder_mad.o readframes.o  readframes1.o  readheader.o \
+        decoder_mad.o readframes.o readframes1.o readheader.o readheader \
         curs.o curs libmpgedit_decoder.so libmpglib_mpgedit.so audio.o \
         mpgedit_buildnum.h mkbuildnum mkbuildnum.o \
         editif_test.o editif_test play tsize play.o tsize.o \
         libmpgedit.so libmpgeditlib.a $(mpgeditlib_objs) simple_play.o \
-        ints.o listlevels.o decoder_public.o readframes readframes1
+        ints.o listlevels.o decoder_public.o readframes readframes1 \
+
 
 cursesstub.c:mp3time.h mp3_header.h mpegcurses.h

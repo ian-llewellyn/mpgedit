@@ -25,7 +25,7 @@
  */
 
 #ifndef lint
-static char SccsId[] = "$Id: decoder_mpg123.c,v 1.15.2.1 2006/02/02 06:18:22 number6 Exp $";
+static char SccsId[] = "$Id: decoder_mpg123.c,v 1.16 2009/02/04 07:45:46 number6 Exp $";
 #endif
 
 /* 

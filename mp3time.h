@@ -20,7 +20,7 @@
  */
 
 /*
- * SccsId[] = "$Id: mp3time.h,v 1.9.2.3 2009/01/16 14:06:28 number6 Exp $"
+ * SccsId[] = "$Id: mp3time.h,v 1.10 2009/02/04 07:45:49 number6 Exp $"
  */
 
 #ifndef _MP3TIME_H

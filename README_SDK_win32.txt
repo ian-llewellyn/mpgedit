@@ -43,7 +43,7 @@ Uninstall xmpgedit with the Windows "Add/Remove Programs" application:
 
     Settings->Control Panel->Add/Remove Programs.
 
-Remove the mpgedit_sdk 0.74beta package, and python2 py_mpgedit-0.3beta1
+Remove the mpgedit_sdk 0.75dev package, and python2 py_mpgedit-0.3beta1
 package.
 
 
@@ -77,7 +77,7 @@ COPYRIGHT
 
 
      mpgedit - MPEG 1/2/2.5 (MP3) audio file editor
-               Version 0.74 beta January 2009
+               Version 0.75 dev April 2009
                    http://mpgedit.org
         Copyright (C) 2001-2009 by Adam Bernstein
 

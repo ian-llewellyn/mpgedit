@@ -1,4 +1,12 @@
-*version 0.74beta1 January 2009*
+*version 0.75dev2 April 2009*
+    - Updated build to support GCC 4.4.
+
+
+*version 0.75dev1 March 2009*
+    - Added support for LAME "Info" tag
+
+
+*version 0.74beta1 February 2009*
     - Improved xmpgedit main scrolled window behavior.
     - Added playback duration for each edit to xmpgedit
     - Added support for command line options in xmpgedit.
@@ -9,6 +17,7 @@
     - Added ability to create subdirectory to file save control.
     - Added ALSA audio driver support.
     - Added additional checks for unsaved edits to xmpgedit.
+    - Added Fedora Core 8 RPMs to the build.
 
 
 

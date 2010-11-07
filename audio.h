@@ -96,7 +96,12 @@ struct anEnv
 
 
 #ifdef ALSA
-#include <sys/asoundlib.h>
+#ifdef ASOUNDLIB_H
+#include <alsa/asoundlib.h>
+#endif
+#ifdef ASOUND_H
+#include <sound/asound.h>
+#endif
 #endif
 
 struct audio_info_struct

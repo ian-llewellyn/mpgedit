@@ -17,11 +17,18 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA  02111-1307  USA.
+ *
+ * http://gabriel.mp3-tech.org/mp3infotag.html
  */
 
 #if 0
 #define __do_graffiti 1
 #endif
+
+#define MPEG1_STEREO_OFFSET (32+4)
+#define MPEG1_MONO_OFFSET   (17+4)
+#define MPEG2_STEREO_OFFSET (17+4)
+#define MPEG2_MONO_OFFSET   (9+4)
 
 static unsigned char xing_header_stereo_44100[] = {
       0xff, 0xfb, 0x50, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -153,12 +160,14 @@ static unsigned char xing_header_mono_11025[] = {
 
 
 #ifndef lint
-static char SccsId[] = "$Id: xing_header.c,v 1.10 2004/11/27 21:13:29 number6 Exp $";
+static char SccsId[] = "$Id: xing_header.c,v 1.10.6.2 2009/04/02 03:14:02 number6 Exp $";
 #endif
 
 #include <stdio.h>
 #include <string.h>
 #include "xing_header.h"
+#include "editif.h"
+#include "mpegstat.h"
 #ifdef __do_graffiti
 #include "version.h"
 #include "mpgedit_buildnum.h"
@@ -318,9 +327,9 @@ void ExtractB2210(unsigned char *buf, int *rx, int *ry)
  * from the decoded header. 'mode' is the raw mpeg channel mode value
  * from the decoded header.
  */
-static void edit_xing_header(int frames, int bytes, 
+void edit_xing_header(int frames, int bytes, 
                       unsigned char *buf, int len,
-                      int version, int mode)
+                      int version, int mode, int is_vbr)
 {
     int offset = 44;
 #ifdef __do_graffiti
@@ -332,24 +341,35 @@ static void edit_xing_header(int frames, int bytes,
       case 3:                /* mpeg 1 */
         switch (mode) {
           case 3:            /* mono */
-            offset = 29;
+            offset = MPEG1_MONO_OFFSET;
             break;
           default:
-            offset = 44;     /* stereo/joint/dual channel */
+            offset = MPEG1_STEREO_OFFSET;     /* stereo/joint/dual channel */
             break;
         }
         break;
       default:               /* mpeg 2/2.5 */
         switch (mode) {
           case 3:            /* mono */
-            offset = 21;
+            offset = MPEG2_MONO_OFFSET;
             break;
           default:           /* stereo/joint/dual channel */
-            offset = 29;
+            offset = MPEG2_STEREO_OFFSET;
             break;
         }
         break;
     }
+
+    /* Set 'Xing' tag to 'Info' when file is not VBR */
+    if (is_vbr == 0) {
+        memcpy(&buf[offset], "Info", 4);
+    }
+    else {
+        /* Set 'Xing' tag to 'Xing' when file is is VBR */
+        memcpy(&buf[offset], "Xing", 4);
+    }
+
+    offset += 8;
     InsertI4(frames, &buf[offset]);
     InsertI4(bytes,  &buf[offset+4]);
 
@@ -389,6 +409,7 @@ int xingheader_file_make3(char *file, int channel_mode, int sample_rate)
 {
     FILE *fp;
     unsigned char xing_header_buf[sizeof(xing_header_stereo_44100)];
+    int sts;
 
     switch (sample_rate) {
       case 44100:
@@ -435,7 +456,12 @@ int xingheader_file_make3(char *file, int channel_mode, int sample_rate)
         return -1;
     }
 
-    fwrite(xing_header_buf, sizeof(xing_header_stereo_44100), 1, fp);
+    sts = fwrite(xing_header_buf, sizeof(xing_header_stereo_44100), 1, fp);
+    if (sts != 1) {
+        fclose(fp);
+        return -1;
+    }
+    
     fclose(fp);
     return 0;
 }
@@ -462,34 +488,40 @@ static int get_xing_header(unsigned char *buf, XHEADDATA *X)
 
     /* 11111111 111BBCCD EEEEFFGH IIJJKLMM  */
 
-    /* BB */
+    /* BB: MPEG audio version ID */
     h_id       = (buf[1] >> 3) & 1;
     h_id2      = (buf[1] >> 3) & 2;
 
-    /* CC */
+    /* CC: Layer description */
     h_layer    = (buf[1] >> 1) & 3;
 
-    /* D */
+    /* D: Protection bit */
     h_protect  =  buf[1]       & 1;
 
+    /* FF: Sampling rate frequency index */
     h_sr_index = (buf[2] >> 2) & 3;
+
+    /* II: Channel mode */
     h_mode     = (buf[3] >> 6) & 3;
     X->h_mode  = h_mode;
 
+    /* Sideinfo length */
     if (h_id) {        /*  mpeg1 */
         if (h_mode != 3) {
-            buf += (32+4);
+            /* Stereo */
+            buf += MPEG1_STEREO_OFFSET; /* 36 */
         }
         else {
-            buf += (17+4);
+            buf += MPEG1_MONO_OFFSET;   /* 21 */
         }
     }
     else {      /* mpeg2 */
         if (h_mode != 3) {
-            buf += (17+4);
+            /* Stereo */
+            buf += MPEG2_STEREO_OFFSET; /* 21 */
         }
         else {
-            buf += (9+4);
+            buf += MPEG2_MONO_OFFSET;   /* 13 */
         }
     }
 
@@ -510,10 +542,18 @@ static int get_xing_header(unsigned char *buf, XHEADDATA *X)
 
     /* fail, header not found */
 
-    if (buf[0] != 'X') return 0;
-    if (buf[1] != 'i') return 0;
-    if (buf[2] != 'n') return 0;
-    if (buf[3] != 'g') return 0;
+    if (buf[0]!='X' || buf[1]!='i' || buf[2]!='n' || buf[3]!='g') {
+        if (buf[0]!='I' || buf[1]!='n' || buf[2]!='f' || buf[3]!='o') {
+            return 0;
+        }
+        else {
+            X->xing_info_header = 1;
+        }
+    }
+    else {
+        X->xing_info_header = 0;
+    }
+    
     buf+=4;
 
     X->h_id = h_id | h_id2;
@@ -588,13 +628,25 @@ int xingheader_init(unsigned char *buf, int len, XHEADDATA *X)
     return rval;
 }
 
+void xingheader_stats_edit(XHEADDATA *xingh,
+                           mpeg_file_stats *stats,
+                           int frames,
+                           int bytes,
+                           int id,
+                           int mode)
+{
+    edit_xing_header(frames, bytes, xingh->xingbuf,
+                     xingh->xingbuflen, id, mode,
+                     mpeg_file_stats_is_vbr(stats));
+}
 
 void xingheader_edit(XHEADDATA *xingh, int frames, int bytes, int id, int mode)
 {
-    edit_xing_header(frames, bytes, xingh->xingbuf, 
-                     xingh->xingbuflen, id, mode);
-    get_xing_header(xingh->xingbuf, xingh);
+    mpeg_file_stats *stats = mpgedit_edit_stats_ctx(xingh->play_ctx);
+
+    xingheader_stats_edit(xingh, stats, frames, bytes, id, mode);
 }
+
 
 
 void xingheader2str(XHEADDATA *xingh, char *cp)
@@ -603,11 +655,22 @@ void xingheader2str(XHEADDATA *xingh, char *cp)
 }
 
 
+int xingheader_init_mpgedit_ctx(XHEADDATA *xingh, void *play_ctx)
+{
+    if (!xingh || !play_ctx) {
+        return -1;
+    }
+
+    xingh->play_ctx = play_ctx;
+    return 0;
+}
+
 
 #if defined(UNIT_TEST)
 #include <stdlib.h>
 int main(int argc, char *argv[])
 {
+    int sts = 0; 
 #define MAX_XING_HEADER_SIZE 2048
     unsigned char buf[MAX_XING_HEADER_SIZE];
     FILE *fp;
@@ -704,7 +767,7 @@ int main(int argc, char *argv[])
         printf("vbr_scale = %d\n", X.vbr_scale);
         printf("==================================\n");
         fseek(fp, 0, SEEK_SET);
-        fwrite(buf, MAX_XING_HEADER_SIZE, 1, fp);
+        sts = fwrite(buf, MAX_XING_HEADER_SIZE, 1, fp);
         fclose(fp);
     }
     return 0;

@@ -83,7 +83,7 @@ sub slice_and_splice($$@)
         $mod++;
         if ($mod == 38) {
             print(".");
-#            print("$mpgedit $silent -e- -o +${base}_splice.${ext} $files\n");
+#            print("<$mpgedit $silent -e- -o +${base}_splice.${ext} $files>\n");
             `$mpgedit $silent -e- -o +${base}_splice.${ext} $files`;
             $files = "";
             $mod = 0;
@@ -267,19 +267,14 @@ sub test3_initialize()
     $mpgedit = "./mpgedit";
   }
 
-  $_=`lame --help 2>&1`;
-  if (/^LAME/) {
-    $lame = "lame";
-  }
-  else {
+  $_=`lame --version 2>&1`;
+  if ($? != 0) {
     print("Test $tn: 'lame' must be installed to proceed\n");
     $rsts = 1;
   }
-  $_=`sox -h 2>&1`;
-  if (/Usage:/ || /sox: SoX Version /) {
-    $sox = "sox";
-  }
-  else {
+
+  $_=`sox --version 2>&1`;
+  if ($? != 0) {
     print("Test $tn: 'sox' must be installed to proceed\n");
     $rsts = 1;
   }
@@ -649,8 +644,8 @@ sub scramble_main($$)
       $line1 = $_;
     }
   }
-  `$mpgedit -o $file_x   -e-$line2 $file`;
-  `$mpgedit -o $file_end -e$line2- $file`;
+  $output=`$mpgedit -o $file_x   -e-$line2 $file`;
+  $output=`$mpgedit -o $file_end -e$line2- $file`;
   `scramble_times.pl $file_x scramble.out`;
   
   # Scramble the input mp3 file, using the time offsets from scramble.out
@@ -670,6 +665,7 @@ sub scramble_main($$)
         ($verbose == 0) && print(".");
         ($verbose == 0) || print("executing command $cmd\n");
         $output=`$cmd`;
+#       print("debug cmd=$cmd\n");
 #       print("$output");
       }
       $cmd="$mpgedit -o ${append}scramble.mp3 ";
@@ -688,13 +684,15 @@ sub scramble_main($$)
     ($verbose == 0) && print(".");
     ($verbose==0) || print("$cmd\n");
     $output=`$cmd`;
-  # print("$output");
+#print("<debug: $cmd>\n");
+#print("$output");
   }
   print("\n");
 
   # Paste the last frame onto the output scramble file
   #
   $output=`$mpgedit -o +scramble.mp3 -e- $file_end`;
+
 
   # Tidy up
   #
@@ -714,6 +712,12 @@ sub unscramble_file_cleanup()
       /^descramble_\d\d*.mp3$/  && unlink($_);
       /^descramble_\d\d*.idx$/  && unlink($_);
     }
+    unlink("descramble.mp3");
+    unlink("descramble_x.mp3");
+    unlink("scramble.mp3");
+    unlink("scramble.out");
+    unlink("scramble.idx");
+
     closedir(DIR);
 }
 
@@ -809,6 +813,9 @@ sub unscramble_main($$)
     #
     if ($cnt >= 40) {
       print(".");
+      if (($i + 1) >= $len) {
+        $edits .= " -e- descramble_x.mp3";
+      }
       $cnt = 0;
       ($verbose==1) &&
         print("mpgedit $silent -o $append$outfile $edits $edit_file\n");
@@ -823,6 +830,7 @@ sub unscramble_main($$)
   # Execute the residual command line.
   #
   if (length("$edits") > 0) {
+    $edits .= " -e$end2-$end1 ";
     ($verbose==1) &&
       print("mpgedit $silent -o $append$outfile $edits $edit_file\n");
     $output=`mpgedit $silent -o $append$outfile $edits $edit_file`;
@@ -831,11 +839,29 @@ sub unscramble_main($$)
   
   # Splice the last frame back onto the descrambled file.
   #
-  print("\n          Splicing final frame onto descramble file\n");
-  ($verbose==1) && print("mpgedit $silent -o +$outfile -e- descramble_x.mp3\n");
-  $output=`mpgedit $silent -o +$outfile -e- descramble_x.mp3`;
-  ($verbose==1) && print("$output");
+#  print("\n          Splicing final frame onto descramble file\n");
+#  ($verbose==1) && print("mpgedit $silent -o +$outfile -e- descramble_x.mp3\n");
+#  $output=`mpgedit $silent -o +$outfile -e- descramble_x.mp3`;
+#  ($verbose==1) && print("$output");
   print("          done.\n");
+  return 0;
+}
+
+
+sub has_xing_header($)
+{
+  my ($mp3file) = @_;
+
+  # Searching for text pattern this short in binary data
+  # may be dangerous.
+  #
+  open(DDFP, "$mp3file") || die("Failed opening $mp3file");
+  binmode(DDFP);
+  read(DDFP, $buf, 64) || die("Failed reading header from $mp3file");
+  close DDFP;
+  ($buf =~ /Xing/) && return "Xing";
+  ($buf =~ /Info/) && return "Info";
+
   return 0;
 }
 

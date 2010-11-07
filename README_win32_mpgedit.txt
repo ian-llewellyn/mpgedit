@@ -1,5 +1,5 @@
      mpgedit - MPEG 1/2/2.5 (MP3) audio file editor
-               Version 0.74beta1 January 2009
+               Version 0.75dev2 April 2009
                      http://mpgedit.org
         Copyright (C) 2001-2009 by Adam Bernstein
 
@@ -13,7 +13,7 @@ the GPL.  See "COPYING" for full details.
 BACKGROUND
 ----------
 This is the Windows installation package of mpgedit, the command line
-and curses version of mpgedit. This is release 0.74beta1.
+and curses version of mpgedit. This is release 0.75dev2.
 
 The major feature of this release is the graphical interface version of
 mpgedit.  Details of the major features included in this release are listed
@@ -65,7 +65,7 @@ cvs -d \
 
 cvs -z3 -d \
   :pserver:anonymous@mpgedit.org:/usr/local/cvsroot \
-  co -r mpgedit_0-74beta1 mpgedit
+  co -r mpgedit_0-75dev2 mpgedit
 
 
 
@@ -75,7 +75,7 @@ You must have Visual C++ configured for command line builds.  The
 easiest way to accomplish this is run vcvars32.bat from a cmd shell.
 
 Download the source:
-    http://mpgedit.org/mpgedit/mpgedit_0-74beta1_src.tar.gz
+    http://mpgedit.org/mpgedit/mpgedit_0-75dev2_src.tar.gz
 
 Or download the source from CVS for 'latest'.
 
@@ -125,7 +125,7 @@ home page:
 COPYRIGHT
 ---------
      mpgedit - MPEG 1/2/2.5 (MP3) audio file editor
-               Version 0.74beta1 January 2009
+               Version 0.75dev2 April 2009
                    http://mpgedit.org
         Copyright (C) 2001-2009 by Adam Bernstein
 

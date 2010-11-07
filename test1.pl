@@ -35,7 +35,9 @@ sub test1_cleanup()
     "test2_x.mp3", "test2_x.idx", "test1_x_1.mp3", 
     "test1_x_1.idx", "test2_x_1.mp3", "test2_x_1.idx", 
     "ATrain.idx", "ATrain23.idx", "ATrain23.times", 
-    "ATrain23_splice.mp3", "ATrain23_end_splice.mp3", "ATrain_noid3.mp3");
+    "ATrain23_splice.mp3", "ATrain23_end_splice.mp3", "ATrain_noid3.mp3",
+    "aa_fixed_splice.mp3", "aa_fixed.idx", "aa_fixed.mp3", "aa_fixed.times", "aa.idx");
+
 
     for (@rmlist) {
         unlink;
@@ -66,6 +68,9 @@ sub test1_cleanup()
 
         /test1_splice\d\d*.mp3$/       && unlink;
         /test1_splice\d\d*_\d\d*.mp3$/ && unlink;
+
+        /aa_fixed_\d\d*.mp3$/          && unlink;
+        /aa_fixed_\d\d*.idx$/          && unlink;
     }
     test4_cleanup();
     closedir(DIR);
@@ -273,7 +278,9 @@ $cmd = "$mpgedit $silent -o test1_splice38.mp3                 " .
 "    test1_28.mp3 test1_29.mp3 test1_30.mp3 test1_31.mp3 " .
 "    test1_32.mp3 test1_33.mp3 test1_34.mp3 test1_35.mp3 " .
 "    test1_36.mp3 test1_37.mp3 test1_38.mp3 test1_39.mp3";
-`$cmd`;
+$output=`$cmd`;
+#print("$cmd\n");
+#print("$output\n");
 
 print("Test $tn: Comparing spliced file with 1 second segment\n");
 if (compare("test1_40.mp3", "test1_splice38.mp3") != 0) {
@@ -733,6 +740,11 @@ sub test1_22($$$)
   unlink("noheader.mp3");
   unlink("xingheader.mp3");
 
+  if (! -f "$file") {
+    print("Test $tn: Unable to proceed with this test, '$file' does not exist\n");
+    print("          lame or sox may not be installed\n");
+    return 1;
+  }
   unxing_file($file, "noheader.mp3", $xing_size);
 
   # Use mpgedit to repair missing Xing header for "noheader.mp3"
@@ -780,6 +792,10 @@ sub test1_23($)
   @vvlist = `$mpgedit -vv $file`;
 
 
+# for $l (@vvlist) {
+#   print("$l");
+# }
+
   ($vvlist[9] =~ /$l1/) || die("Failed verifying line $lineno");
   $lineno++;
   ($vvlist[10] =~ /$l2/) || die("Failed verifying line $lineno");
@@ -806,6 +822,110 @@ sub test1_23($)
 }
 
 
+# Xing/Info VBR/CBR header tests
+#
+sub test1_24()
+{
+
+#zzz
+  print("Test $tn: CBR Edits with Info header\n");
+  test1_cleanup();
+  # First validate mpgedit can properly report CBR file with Info header
+  #
+  $sts = has_xing_header("aa.mp3");
+  ($sts =~ /Info/) || die("Failed verifying aa.mp3 as Info $lineno");
+
+  # Call once to index file
+  `$mpgedit aa.mp3`;
+
+
+  # First determine if mpgedit can find Info header in aa.mp3.
+  # Note: This file is broken, in that the frame and byte count are
+  # the wrong values.
+  #
+  @vlist = `$mpgedit -v aa.mp3`;
+#  for (@vlist) {
+#    print;
+#  }
+
+  ($vlist[0] =~ /Found xing header/) ||
+    die("Xing header not found by mpgedit in aa.mp3 $lineno");
+  ($vlist[6] =~ /frames.*35005/) ||
+    die("Expected frame count=$vlist[6] not found by mpgedit in aa.mp3 $lineno");
+  ($vlist[7] =~ /bytes.*7561296/) ||
+    die("Expected file size=$vlist[7] not found by mpgedit in aa.mp3 $lineno");
+
+  # Do an edit of the complete aa.mp3 file. This should fix the Info
+  # header values. Verify this happens.
+  #
+  `$mpgedit -o aa_fixed.mp3 -e- aa.mp3`;
+  `$mpgedit aa_fixed.mp3`;
+
+
+  # Verify Info header is present in edited output file
+  #
+  $sts = has_xing_header("aa_fixed.mp3");
+  ($sts =~ /Info/) || die("Failed verifying aa_fixed.mp3 as Info $lineno");
+
+  # Verify Info header matches frame/byte count values
+  #
+  @vlist = `$mpgedit -v aa_fixed.mp3`;
+  
+  for (@vlist) {
+    (/^File size:.*/)    && (($size = $_)         =~ s/File size: *//);
+    (/^Total frames:.*/) && (($total_frames = $_) =~ s/Total frames: *//);
+
+    (/^bytes  *= /)      && (($bytes = $_)        =~ s/bytes\s*= //);
+    (/^frames  *= /)     && (($frames = $_)       =~ s/frames\s*= //);
+  }
+  chop $total_frames;
+  chop $size;
+  chop $bytes;
+  chop $frames;
+#  print("debug size=$size\n");
+#  print("debug frames=$total_frames\n");
+#  print("debug bytes=$bytes\n");
+#  print("debug frames=$frames\n");
+
+  ($size == $bytes) || 
+      die("Info header file size incorrect ($size, $bytes) for aa_fixed.mp3 $lineno");
+  ($frames == $total_frames) || 
+      die("Info header frame count incorrect ($frames, $total_frames) for aa_fixed.mp3 $lineno");
+
+  slice_and_splice("aa_fixed", "mp3");
+  ($? != 0) && die("Failed splitting and joining aa_fixed.mp3 into individual frames");
+
+  $rsts=scramble_main("aa_fixed.mp3", 0);
+  ($rsts == 0) || die ("Failed test $tn: 'scramble aa_fixed.mp3' failed\n");
+
+  $rsts = unscramble_main("scramble.mp3", 0);
+  ($rsts == 0) || die ("Failed test $tn: 'unscramble scramble.mp3' failed\n");
+  print("          Comparing descramble.mp3 to original 'aa_fixed.mp3'\n");
+  if (compare("aa_fixed.mp3",  "descramble.mp3") != 0) {
+    die("Failed test $tn: 'aa_fixed.mp3' and 'descramble.mp3' do not compare\n");
+  }
+
+#Found xing header
+#h_id      = 3
+#h_layer   = 3
+#h_protect = 0
+#samprate  = 32000
+#flags     = 15
+#frames    = 35005
+#bytes     = 7561296
+#vbr_scale = 57
+
+#File name:    aa_fixed.mp3
+#CBR:          48
+#Total frames: 222
+#File size:    48168
+#Track length: 0:07.992 (7s)
+
+  test1_cleanup();
+  unscramble_file_cleanup();
+}
+
+
 sub main()
 {
     my $all_tests = 0;
@@ -829,6 +949,10 @@ sub main()
         test3_cleanup();
         exit(0);
     }
+
+#test1_16();
+#test1_22("test1_44100m.mp3", 417, "44100 Mono");
+#exit(1);
 
     test1_1();
     test1_2();
@@ -906,6 +1030,7 @@ sub main()
     test1_18();
     test1_15();
     test1_16();
+    test1_24();
 
     # Xing header tests.
     test1_21();

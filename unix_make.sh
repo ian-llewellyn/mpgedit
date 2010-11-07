@@ -12,6 +12,10 @@ if [ $os = linux ]; then
     if [ \( $host = 'jake' -a -f /bin/rpm \) -o \
          \( \( $host = 'batman' -o $host = quatro \) -a \
             -f /usr/bin/rpmbuild \) ]; then
+      if [ -z "$CVSROOT" ]; then
+        echo "ERROR: CVSROOT must be specified in the environment"
+        exit 1
+      fi
       make -f Makefile source_package
       make -f Makefile rpm_package
     fi

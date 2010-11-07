@@ -208,6 +208,7 @@ typedef struct _idle_editfile_ctx {
     editspec_t      *edarray;
     int             edarray_len;
     editspec_t      *built_edarray;
+    mpeg_file_stats edit_stats;
 } idle_editfile_ctx;
 
 
@@ -3637,6 +3638,7 @@ gint cb_edit_idle_editfile(gpointer data)
     switch (ctx->state) {
       case EDIT_IDLE_STATE_INIT:
         ctx->edit_indx    = 0;
+        memset(&ctx->edit_stats, 0, sizeof(ctx->edit_stats));
         ctx->edit_flags = append ? MPGEDIT_FLAGS_APPEND : 0;
         ctx->out_fileindx = 1;
         ctx->state = EDIT_IDLE_STATE_LOOP;
@@ -3708,9 +3710,9 @@ gint cb_edit_idle_editfile(gpointer data)
         ctx->total_sec = ___compute_edit_total_secs(
                              ctx->gvctx, ctx->built_edarray, built_len);
         ctx->edit_indx += built_len;
-        ctx->edfiles_ctx = mpgedit_edit_files_init(
+        ctx->edfiles_ctx = mpgedit_edit_files_init5(
                                ctx->built_edarray, ctx->out_filename,
-                               ctx->edit_flags, &sts);
+                               ctx->edit_flags, &ctx->edit_stats, &sts);
         if (ctx->edfiles_ctx && sts == 0) {
             ctx->edfiles_ctx_editing = 
                 mpgedit_edit_files(ctx->edfiles_ctx, &sts);

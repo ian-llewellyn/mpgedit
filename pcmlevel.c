@@ -60,6 +60,7 @@ void mpgedit_pcmlevel_write_header(mpgedit_pcmfile_t *ctx,
                                    int secbits, int msecbits)
 {
     unsigned char buf[1];
+    int sts;
 
     /*
      * Header format: version | pcmbits | secbits | msecbits
@@ -67,19 +68,31 @@ void mpgedit_pcmlevel_write_header(mpgedit_pcmfile_t *ctx,
 
     /* version */
     buf[0] = ver;
-    fwrite(buf, sizeof(buf), 1, ctx->fp);
+    sts = fwrite(buf, sizeof(buf), 1, ctx->fp);
+    if (sts != 1) {
+        return;
+    }
 
     /* pcmbits */
     buf[0] = pcmbits;
-    fwrite(buf, sizeof(buf), 1, ctx->fp);
+    sts = fwrite(buf, sizeof(buf), 1, ctx->fp);
+    if (sts != 1) {
+        return;
+    }
 
     /* secbits */
     buf[0] = secbits;
-    fwrite(buf, sizeof(buf), 1, ctx->fp);
+    sts = fwrite(buf, sizeof(buf), 1, ctx->fp);
+    if (sts != 1) {
+        return;
+    }
 
     /* msecbits */
     buf[0] = msecbits;
-    fwrite(buf, sizeof(buf), 1, ctx->fp);
+    sts = fwrite(buf, sizeof(buf), 1, ctx->fp);
+    if (sts != 1) {
+        return;
+    }
 }
 
 
@@ -166,11 +179,12 @@ void mpgedit_pcmlevel_write_average(mpgedit_pcmfile_t *ctx,
                                     int avg, int max, int min)
 {
     unsigned char buf[6];
+    int sts;
 
     InsertI2(avg, buf);
     InsertI2(max, buf+2);
     InsertI2(min, buf+4);
-    fwrite(buf, sizeof(buf), 1, ctx->fp);
+    sts = fwrite(buf, sizeof(buf), 1, ctx->fp);
 }
 
 
@@ -204,6 +218,7 @@ void mpgedit_pcmlevel_write_entry(mpgedit_pcmfile_t *ctx,
                                   int pcmlevel, long sec, long msec)
 {
     unsigned char buf[6];
+    int sts;
 
     if (!ctx->fp) {
         return;
@@ -211,7 +226,7 @@ void mpgedit_pcmlevel_write_entry(mpgedit_pcmfile_t *ctx,
 
     InsertI2(pcmlevel, buf);
     InsertB2210(buf+2, sec, msec);
-    fwrite(buf, sizeof(buf), 1, ctx->fp);
+    sts = fwrite(buf, sizeof(buf), 1, ctx->fp);
 }
 
 
